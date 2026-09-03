@@ -15,6 +15,7 @@ export default function TransactionsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
+        <Typography variant="h2" style={styles.title}>Transactions</Typography>
         <View style={styles.searchBar}>
           <Search color={COLORS.textMuted} size={20} />
           <TextInput 
@@ -125,6 +126,10 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
+  },
+  title: {
+    paddingHorizontal: SIZES.padding,
+    marginBottom: 16,
   },
   searchBar: {
     flexDirection: 'row',
