@@ -4,7 +4,7 @@ This roadmap outlines the phases of building Assay, from setup to the AI-powered
 
 ---
 
-## Phase 0: Planning
+## Phase 0: Planning & Specifications
 * **Objective:** Define product scope, create database schemas, styling guidelines, and project specifications.
 * **Status:** ✅ Completed
 * **Deliverables:** PRD, ARCHITECTURE, RULES, PHASES, and initial DESIGN_SYSTEM documents.
@@ -13,47 +13,44 @@ This roadmap outlines the phases of building Assay, from setup to the AI-powered
 
 ## Phase 1: Project Setup & Core Layout
 * **Objective:** Create the initial mobile app skeleton, routing layout, and visual components.
-* **Status:** ⏳ In Progress
-* **Tasks:**
+* **Status:** ✅ Completed
+* **Deliverables:**
   - [x] Create project repository & install Expo v54.
   - [x] Configure TypeScript config & default imports.
-  - [x] Load custom fonts (`Inter`, `AnticDidone`).
-  - [ ] Implement tab routing (Dashboard, Scan, History, Settings).
-  - [ ] Design visual components (Button, Card, Typography).
+  - [x] Load custom fonts (`AnticDidone_400Regular`, `DMSans_400Regular`, `DMSans_500Medium`, `DMSans_600SemiBold`, `DMSans_700Bold`).
+  - [x] Implement bottom tab routing (`app/(tabs)/_layout.tsx`: Dashboard, Upload, Transactions, Insights, Settings).
+  - [x] Design visual component system (`Typography`, `Card`/`AppCard`, `Button`/`AppButton`, `ScreenHeader`, `TransactionRow`, `AppChip`, `AppInput`).
 
 ---
 
-## Phase 2: Authentication
+## Phase 2: Design System & Mobile UI Redesign
+* **Objective:** Standardize the entire mobile UI under ONE strict visual identity and design system.
+* **Status:** ✅ Completed
+* **Deliverables:**
+  - [x] Centralize color tokens (Deep Navy `#111827`, Warm Off-White `#F7F7F5`, Surface White `#FFFFFF`, Assay Gold `#D6A928`, Border `#E7E7E3`).
+  - [x] Enforce typography hierarchy (Antic Didone for editorial page titles, DM Sans / Avenir Next for primary UI).
+  - [x] Build and integrate cohesive `ScreenHeader` across all major screens.
+  - [x] Remove debug controls (blue gear icon) and replace with clean system navigation.
+  - [x] Standardize Dashboard screen with Monthly Spend Hero, Quick Actions, Donut breakdown, Money Leaks, and Recent Transactions.
+  - [x] Standardize Upload screen with upload surface and AI Extraction Pipeline preview.
+  - [x] Standardize Transactions screen with search bar, filter chips, and date-grouped transaction lists.
+  - [x] Standardize Insights screen with segmented control (`Overview`, `Trends`, `Analysis`), hero sparkline card, and insight cards.
+  - [x] Standardize Settings screen with Profile card, Preferences, Support list rows, and Log Out action.
+  - [x] Standardize modal flows (Welcome screen, Transaction Detail, Smart Split, Assay AI Assistant).
+
+---
+
+## Phase 3: Authentication
 * **Objective:** Secure app access and enable personal database records.
 * **Status:** 📋 Pending
 * **Tasks:**
   - [ ] Setup Auth system (Supabase Auth or OAuth/JWT flow).
-  - [ ] Build Login, Signup, and Password Reset screens.
+  - [ ] Build Login, Signup, and Password Reset screens using the Assay design system.
   - [ ] Implement secure storage token cache on-device.
 
 ---
 
-## Phase 3: Dashboard & Transactions History
-* **Objective:** Present transaction lists, spending summaries, and categories.
-* **Status:** 📋 Pending
-* **Tasks:**
-  - [ ] Create Dashboard Hero Card (Total Month Spend).
-  - [ ] Build Category breakdown carousel.
-  - [ ] Implement search and filterable Transactions History list view.
-
----
-
-## Phase 4: Upload, Camera & Gallery Integration
-* **Objective:** Allow users to capture receipts or select screenshots.
-* **Status:** 📋 Pending
-* **Tasks:**
-  - [ ] Integrate `expo-camera` permissions and viewfinder layout.
-  - [ ] Setup image selector for importing from photo library.
-  - [ ] Handle local file compression and caching before upload.
-
----
-
-## Phase 5: Backend & Image Storage
+## Phase 4: Backend & Image Storage
 * **Objective:** Setup FastAPI server, database connections, and file uploads.
 * **Status:** 📋 Pending
 * **Tasks:**
@@ -63,68 +60,30 @@ This roadmap outlines the phases of building Assay, from setup to the AI-powered
 
 ---
 
-## Phase 6: OCR Pipeline
-* **Objective:** Convert receipt/screenshot images into raw text strings.
+## Phase 5: OCR Pipeline & AI Parser
+* **Objective:** Convert receipt/screenshot images into raw text strings and structured transaction JSON.
 * **Status:** 📋 Pending
 * **Tasks:**
   - [ ] Integrate Google Cloud Vision API on the backend.
-  - [ ] Build pre-processing helpers (grayscale, contrast adjustments).
-  - [ ] Setup fallback to Tesseract for offline/development mode.
-
----
-
-## Phase 7: Expense AI Parser
-* **Objective:** Turn unstructured OCR text block into clear transaction objects.
-* **Status:** 📋 Pending
-* **Tasks:**
   - [ ] Configure Gemini Developer API client.
   - [ ] Prompt engineer JSON output matching transaction schema parameters.
-  - [ ] Implement fallbacks for partial parser failure (e.g. unknown dates).
 
 ---
 
-## Phase 8: Smart Categorization
-* **Objective:** Automatically group transactions into standard categories.
+## Phase 6: Smart Categorization & Leak Engine
+* **Objective:** Automatically group transactions and detect recurring micro-spends.
 * **Status:** 📋 Pending
 * **Tasks:**
-  - [ ] Build classification embeddings or LLM mapping for merchant identification.
-  - [ ] Allow custom category creation and system learning based on user updates.
+  - [ ] Build merchant classification embeddings / LLM mapping.
+  - [ ] Implement grouping logic for micro-transactions under ₹100.
+  - [ ] Calculate monthly/annual projected cost impact of micro-spending habits.
 
 ---
 
-## Phase 9: Analytics & Budgeting
-* **Objective:** Visual feedback and budget tracking.
+## Phase 7: Analytics, Smart Split & AI Chatbot Integration
+* **Objective:** Live API integration for charts, bill splitting, and natural language financial query assistant.
 * **Status:** 📋 Pending
 * **Tasks:**
-  - [ ] Build interactive charts (Pie chart, Bar chart) using SVG tools.
-  - [ ] Set monthly budget limits per category and trigger alert banners.
-
----
-
-## Phase 10: Money Leak Engine
-* **Objective:** Detect recurring daily/weekly micro-spends.
-* **Status:** 📋 Pending
-* **Tasks:**
-  - [ ] Implement grouping logic for merchants with frequent transactions.
-  - [ ] Project annual cost impact of micro-spending habits.
-  - [ ] Build proactive dashboard cards highlighting detected leak categories.
-
----
-
-## Phase 11: Smart Split
-* **Objective:** OCR-assisted split billing among friends.
-* **Status:** 📋 Pending
-* **Tasks:**
-  - [ ] Parse individual items from restaurant invoices.
-  - [ ] Create user interface allowing assigning items to friends.
-  - [ ] Generate quick payment links or UPI deep links.
-
----
-
-## Phase 12: AI Assistant
-* **Objective:** Natural language chatbot interface to ask budgeting questions.
-* **Status:** 📋 Pending
-* **Tasks:**
-  - [ ] Build chat screen client inside the app.
-  - [ ] Provide Gemini with access to transaction histories using vector search or direct DB context queries.
-  - [ ] Implement smart recommendation cards within the chat.
+  - [ ] Connect interactive charts to live backend backend analytics routes.
+  - [ ] Wire OCR item parsing into Smart Split friend assignment flow.
+  - [ ] Connect Assay AI chat interface to RAG vector database backend.

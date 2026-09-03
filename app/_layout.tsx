@@ -1,5 +1,11 @@
 import { Stack } from 'expo-router';
 import { useFonts, AnticDidone_400Regular } from '@expo-google-fonts/antic-didone';
+import { 
+  DMSans_400Regular, 
+  DMSans_500Medium, 
+  DMSans_600SemiBold, 
+  DMSans_700Bold 
+} from '@expo-google-fonts/dm-sans';
 import { Inter_400Regular, Inter_500Medium, Inter_700Bold } from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
@@ -10,6 +16,10 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     AnticDidone_400Regular,
+    DMSans_400Regular,
+    DMSans_500Medium,
+    DMSans_600SemiBold,
+    DMSans_700Bold,
     Inter_400Regular,
     Inter_500Medium,
     Inter_700Bold,
@@ -29,7 +39,7 @@ export default function RootLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: '#F8F7F4' },
+        contentStyle: { backgroundColor: COLORS.background },
       }}
     >
       <Stack.Screen name="index" />

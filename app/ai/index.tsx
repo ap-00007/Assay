@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Typography } from '../../components/Typography';
-import { COLORS, SIZES, SHADOWS } from '../../constants/theme';
-import { X, Send, Bot, Sparkles } from 'lucide-react-native';
+import { COLORS, SIZES, SPACING } from '../../constants/theme';
+import { X, Send, Sparkles, Bot, ArrowUpRight } from 'lucide-react-native';
 
 export default function AssayAIScreen() {
   const router = useRouter();
@@ -12,13 +12,19 @@ export default function AssayAIScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <View style={{width: 24}} /> {/* Spacer */}
+        <View style={{ width: 40 }} />
         <View style={styles.headerTitleRow}>
-          <Sparkles color={COLORS.gold} size={18} />
-          <Typography variant="bodyBold" style={{marginLeft: 8}}>Assay AI</Typography>
+          <Sparkles color={COLORS.gold} size={18} strokeWidth={2} />
+          <Typography variant="bodyBold" style={{ marginLeft: 8, fontSize: 16 }}>
+            Assay Intelligence
+          </Typography>
         </View>
-        <TouchableOpacity onPress={() => router.back()} style={styles.closeBtn}>
-          <X color={COLORS.text} size={24} />
+        <TouchableOpacity 
+          onPress={() => router.back()} 
+          style={styles.closeBtn}
+          activeOpacity={0.7}
+        >
+          <X color={COLORS.text} size={20} strokeWidth={1.8} />
         </TouchableOpacity>
       </View>
 
@@ -30,32 +36,38 @@ export default function AssayAIScreen() {
           
           <View style={styles.greetingContainer}>
             <View style={styles.aiAvatar}>
-              <Bot color={COLORS.white} size={32} />
+              <Sparkles color={COLORS.gold} size={28} strokeWidth={2} />
             </View>
             <Typography variant="h2" align="center" style={styles.greetingTitle}>
-              Hi Ashish 👋
+              Hi Ashish
             </Typography>
-            <Typography variant="body" color={COLORS.textMuted} align="center">
-              How can I help you today?
+            <Typography variant="secondary" color={COLORS.textSecondary} align="center">
+              Ask any question about your spending, leaks, or trends.
             </Typography>
           </View>
 
           <View style={styles.suggestionsList}>
-            <SuggestionChip title="Top Merchants" />
-            <SuggestionChip title="Budget Check" />
-            <SuggestionChip title="Monthly Summary" />
-            <SuggestionChip title="How much did I spend on coffee?" />
-            <SuggestionChip title="Where is most of my money going?" />
-            <SuggestionChip title="Did I overspend this week?" />
+            <SuggestionChip title="Top Merchants" onPress={() => setInput("What are my top merchants this month?")} />
+            <SuggestionChip title="Budget Check" onPress={() => setInput("How is my budget pacing for this month?")} />
+            <SuggestionChip title="Monthly Summary" onPress={() => setInput("Give me a summary of my spending.")} />
+            <SuggestionChip title="How much did I spend on coffee?" onPress={() => setInput("How much did I spend on coffee?")} />
+            <SuggestionChip title="Where is most of my money going?" onPress={() => setInput("Where is most of my money going?")} />
           </View>
 
-          {/* Example mock chat bubble */}
+          {/* Example Chat Bubble */}
           <View style={styles.chatArea}>
             <View style={styles.userBubble}>
-              <Typography variant="body" color={COLORS.white}>What's my biggest expense this month?</Typography>
+              <Typography variant="body" color={COLORS.white}>
+                What's my biggest expense category this month?
+              </Typography>
             </View>
             <View style={styles.aiBubble}>
-              <Typography variant="body">Your biggest expense this month is Food & Dining, totaling ₹4,200. This is 20% higher than last month.</Typography>
+              <Typography variant="body" color={COLORS.text}>
+                Your biggest expense category is <Typography variant="bodyBold">Food & Dining</Typography> at <Typography variant="financial">₹4,200</Typography> (34% of total).
+              </Typography>
+              <Typography variant="secondary" color={COLORS.textSecondary} style={{ marginTop: 8 }}>
+                This is ₹860 higher than the same period last month, driven primarily by 8 Starbucks visits and weekend dining.
+              </Typography>
             </View>
           </View>
 
@@ -65,13 +77,17 @@ export default function AssayAIScreen() {
           <View style={styles.inputWrapper}>
             <TextInput
               style={styles.input}
-              placeholder="Ask Assay..."
-              placeholderTextColor={COLORS.textMuted}
+              placeholder="Ask Assay AI..."
+              placeholderTextColor={COLORS.textSecondary}
               value={input}
               onChangeText={setInput}
             />
-            <TouchableOpacity style={styles.sendBtn} activeOpacity={0.7}>
-              <Send color={COLORS.white} size={20} />
+            <TouchableOpacity 
+              style={[styles.sendBtn, !input.trim() && styles.sendBtnDisabled]} 
+              activeOpacity={0.7}
+              disabled={!input.trim()}
+            >
+              <Send color={COLORS.white} size={18} strokeWidth={2} />
             </TouchableOpacity>
           </View>
         </View>
@@ -80,8 +96,8 @@ export default function AssayAIScreen() {
   );
 }
 
-const SuggestionChip = ({ title }: { title: string }) => (
-  <TouchableOpacity style={styles.suggestionChip}>
+const SuggestionChip = ({ title, onPress }: { title: string; onPress?: () => void }) => (
+  <TouchableOpacity style={styles.suggestionChip} onPress={onPress} activeOpacity={0.7}>
     <Typography variant="caption" color={COLORS.primary}>{title}</Typography>
   </TouchableOpacity>
 );
@@ -108,41 +124,46 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   closeBtn: {
-    padding: 8,
-    marginRight: -8,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scrollContent: {
-    padding: SIZES.padding,
-    paddingBottom: 40,
+    paddingHorizontal: SIZES.padding,
+    paddingBottom: 32,
   },
   greetingContainer: {
     alignItems: 'center',
-    marginVertical: 40,
+    marginVertical: 32,
   },
   aiAvatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
-    ...SHADOWS.medium,
+    marginBottom: 16,
   },
   greetingTitle: {
-    marginBottom: 8,
+    marginBottom: 6,
   },
   suggestionsList: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    gap: 12,
-    marginBottom: 40,
+    gap: 8,
+    marginBottom: 32,
   },
   suggestionChip: {
-    backgroundColor: COLORS.white,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    backgroundColor: COLORS.surface,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -153,22 +174,25 @@ const styles = StyleSheet.create({
   userBubble: {
     backgroundColor: COLORS.primary,
     padding: 16,
-    borderRadius: 20,
+    borderRadius: 18,
     borderBottomRightRadius: 4,
     alignSelf: 'flex-end',
-    maxWidth: '80%',
+    maxWidth: '82%',
   },
   aiBubble: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.surface,
     padding: 16,
-    borderRadius: 20,
+    borderRadius: 18,
     borderBottomLeftRadius: 4,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     alignSelf: 'flex-start',
-    maxWidth: '80%',
-    ...SHADOWS.soft,
+    maxWidth: '85%',
   },
   inputContainer: {
     padding: SIZES.padding,
+    paddingTop: 12,
+    paddingBottom: Platform.OS === 'ios' ? 36 : 16,
     backgroundColor: COLORS.background,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
@@ -176,9 +200,9 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.surface,
     borderRadius: 24,
-    paddingLeft: 20,
+    paddingLeft: 16,
     paddingRight: 6,
     paddingVertical: 6,
     borderWidth: 1,
@@ -187,17 +211,20 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontFamily: 'Inter_400Regular',
-    fontSize: 16,
+    fontSize: 15,
     color: COLORS.text,
-    height: 40,
+    height: 38,
   },
   sendBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 12,
+    marginLeft: 8,
+  },
+  sendBtnDisabled: {
+    backgroundColor: COLORS.border,
   },
 });

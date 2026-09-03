@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "Assay Docs": {
+      "type": "sse",
+      "url": "https://gitmcp.io/ap-00007/Assay"
+    }
+  }
+}

@@ -3,8 +3,8 @@ import { View, StyleSheet, SafeAreaView, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Typography } from '../components/Typography';
 import { Button } from '../components/Button';
-import { COLORS, SIZES } from '../constants/theme';
-import { LayoutDashboard } from 'lucide-react-native';
+import { COLORS, SIZES, SPACING } from '../constants/theme';
+import { LayoutDashboard, Sparkles } from 'lucide-react-native';
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -15,18 +15,23 @@ export default function WelcomeScreen() {
       
       <View style={styles.content}>
         <View style={styles.logoContainer}>
-          <LayoutDashboard size={64} color={COLORS.gold} strokeWidth={1.5} />
-          <Typography variant="h1" color={COLORS.white} style={styles.title}>
+          <View style={styles.iconCircle}>
+            <Sparkles size={36} color={COLORS.gold} strokeWidth={2} />
+          </View>
+          <Typography variant="display" color={COLORS.white} style={styles.brandTitle}>
             Assay
+          </Typography>
+          <Typography variant="caption" color={COLORS.gold} style={styles.tagline}>
+            FINANCIAL INTELLIGENCE
           </Typography>
         </View>
 
         <View style={styles.textContainer}>
-          <Typography variant="h2" color={COLORS.white} align="center" style={styles.subtitle}>
-            Understand your money.
+          <Typography variant="h1" color={COLORS.white} align="center" style={styles.subtitle}>
+            Understand your money with quiet clarity.
           </Typography>
-          <Typography variant="body" color={COLORS.textMuted} align="center">
-            Take control of every rupee.
+          <Typography variant="body" color={COLORS.textSecondary} align="center" style={styles.description}>
+            AI-powered receipt extraction, spend tracking, and hidden leak analysis.
           </Typography>
         </View>
       </View>
@@ -36,7 +41,6 @@ export default function WelcomeScreen() {
           title="Get Started" 
           variant="gold" 
           onPress={() => router.replace('/(tabs)')}
-          style={styles.button}
         />
         <Button 
           title="I already have an account" 
@@ -61,24 +65,41 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 60,
+    marginBottom: 48,
   },
-  title: {
-    marginTop: 20,
+  iconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: 'rgba(214, 169, 40, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(214, 169, 40, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  brandTitle: {
+    fontSize: 44,
+  },
+  tagline: {
+    letterSpacing: 2,
+    marginTop: 6,
+    fontWeight: '600',
   },
   textContainer: {
     alignItems: 'center',
     gap: 12,
+    maxWidth: 320,
   },
   subtitle: {
-    marginBottom: 8,
+    lineHeight: 38,
+  },
+  description: {
+    lineHeight: 24,
   },
   footer: {
     padding: SIZES.padding,
     paddingBottom: 40,
-    gap: 16,
-  },
-  button: {
-    marginBottom: 8,
+    gap: 12,
   },
 });

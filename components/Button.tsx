@@ -1,30 +1,51 @@
 import React from 'react';
-import { TouchableOpacity, TouchableOpacityProps, StyleSheet, ViewStyle, StyleProp } from 'react-native';
+import { TouchableOpacity, TouchableOpacityProps, StyleSheet, ViewStyle, StyleProp, ActivityIndicator } from 'react-native';
 import { Typography } from './Typography';
-import { COLORS, SIZES } from '../constants/theme';
+import { COLORS, SIZES, FONTS } from '../constants/theme';
 
-interface ButtonProps extends TouchableOpacityProps {
+export interface ButtonProps extends TouchableOpacityProps {
   title: string;
-  variant?: 'primary' | 'secondary' | 'gold';
+  variant?: 'primary' | 'secondary' | 'accent' | 'gold';
+  size?: 'sm' | 'md' | 'lg';
+  loading?: boolean;
+  icon?: React.ReactNode;
   style?: StyleProp<ViewStyle>;
 }
 
-export function Button({ title, variant = 'primary', style, ...props }: ButtonProps) {
+export function Button({ 
+  title, 
+  variant = 'primary', 
+  size = 'md',
+  loading = false,
+  icon,
+  style, 
+  disabled,
+  ...props 
+}: ButtonProps) {
+  const isPrimary = variant === 'primary';
+  const isSecondary = variant === 'secondary';
+  const isGold = variant === 'gold' || variant === 'accent';
+
   const getBackgroundColor = () => {
-    switch (variant) {
-      case 'gold': return COLORS.gold;
-      case 'secondary': return 'transparent';
-      case 'primary':
-      default: return COLORS.primary;
-    }
+    if (disabled) return COLORS.border;
+    if (isGold) return COLORS.gold;
+    if (isSecondary) return COLORS.surface;
+    return COLORS.primary;
   };
 
   const getTextColor = () => {
-    switch (variant) {
-      case 'secondary': return COLORS.white; // Assuming secondary is used on dark bg
-      case 'gold': return COLORS.primary;
-      case 'primary':
-      default: return COLORS.white;
+    if (disabled) return COLORS.textMuted;
+    if (isGold) return COLORS.primary;
+    if (isSecondary) return COLORS.primary;
+    return COLORS.white;
+  };
+
+  const getHeight = () => {
+    switch (size) {
+      case 'sm': return 40;
+      case 'lg': return 56;
+      case 'md':
+      default: return 50;
     }
   };
 
@@ -32,35 +53,50 @@ export function Button({ title, variant = 'primary', style, ...props }: ButtonPr
     <TouchableOpacity
       style={[
         styles.button,
-        { backgroundColor: getBackgroundColor() },
-        variant === 'secondary' && styles.secondaryButton,
+        { 
+          backgroundColor: getBackgroundColor(),
+          height: getHeight(),
+          opacity: disabled ? 0.6 : 1,
+        },
+        isSecondary && styles.secondaryButton,
         style,
       ]}
-      activeOpacity={0.8}
+      activeOpacity={0.7}
+      disabled={disabled || loading}
       {...props}
     >
-      <Typography 
-        variant="bodyMedium" 
-        color={getTextColor()}
-        align="center"
-      >
-        {title}
-      </Typography>
+      {loading ? (
+        <ActivityIndicator color={getTextColor()} size="small" />
+      ) : (
+        <>
+          {icon && <>{icon}</>}
+          <Typography 
+            variant="bodyMedium" 
+            color={getTextColor()}
+            align="center"
+            style={icon ? { marginLeft: 8 } : undefined}
+          >
+            {title}
+          </Typography>
+        </>
+      )}
     </TouchableOpacity>
   );
 }
 
+export const AppButton = Button;
+
 const styles = StyleSheet.create({
   button: {
-    height: 56,
     borderRadius: SIZES.radius,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     width: '100%',
   },
   secondaryButton: {
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: COLORS.border,
   },
 });

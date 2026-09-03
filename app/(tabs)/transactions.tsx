@@ -1,214 +1,188 @@
 import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, SafeAreaView, TextInput, TouchableOpacity } from 'react-native';
+import { View, ScrollView, StyleSheet, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Typography } from '../../components/Typography';
 import { Card } from '../../components/Card';
-import { COLORS, SIZES } from '../../constants/theme';
-import { Search } from 'lucide-react-native';
+import { ScreenHeader } from '../../components/ui/ScreenHeader';
+import { AppInput } from '../../components/ui/AppInput';
+import { AppChip } from '../../components/ui/AppChip';
+import { TransactionRow } from '../../components/ui/TransactionRow';
+import { COLORS, SIZES, SPACING } from '../../constants/theme';
 
 const FILTERS = ['All', 'UPI', 'Receipt', 'Cash', 'Card'];
 
 export default function TransactionsScreen() {
   const router = useRouter();
   const [activeFilter, setActiveFilter] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Typography variant="h2" style={styles.title}>Transactions</Typography>
-        <View style={styles.searchBar}>
-          <Search color={COLORS.textMuted} size={20} />
-          <TextInput 
-            style={styles.searchInput}
+      {/* Unified Header */}
+      <ScreenHeader 
+        title="Transactions" 
+        showNotification
+        onNotificationPress={() => router.push('/ai')}
+      />
+
+      <View style={styles.filterSection}>
+        {/* Search Bar */}
+        <View style={styles.searchWrapper}>
+          <AppInput 
             placeholder="Search transactions..."
-            placeholderTextColor={COLORS.textMuted}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
           />
         </View>
         
+        {/* Filter Chips */}
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.filtersContent}
         >
           {FILTERS.map((filter) => (
-            <TouchableOpacity 
+            <AppChip 
               key={filter}
-              style={[styles.filterChip, activeFilter === filter && styles.activeFilterChip]}
+              label={filter}
+              active={activeFilter === filter}
               onPress={() => setActiveFilter(filter)}
-            >
-              <Typography 
-                variant="bodyMedium" 
-                color={activeFilter === filter ? COLORS.white : COLORS.text}
-              >
-                {filter}
-              </Typography>
-            </TouchableOpacity>
+            />
           ))}
         </ScrollView>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        
-        {/* Date Group 1 */}
-        <Typography variant="bodyBold" color={COLORS.textMuted} style={styles.dateHeader}>
-          Today
+      <ScrollView 
+        showsVerticalScrollIndicator={false} 
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Group 1: Today */}
+        <Typography variant="caption" color={COLORS.textSecondary} style={styles.groupHeader}>
+          TODAY
         </Typography>
-        <Card style={styles.transactionsCard}>
-          <TransactionItem 
-            name="Starbucks" category="Food & Dining" method="UPI" time="10:42 AM" amount="-₹340" 
+        <Card variant="list" style={styles.groupCard}>
+          <TransactionRow 
+            name="Starbucks" 
+            category="Food & Dining" 
+            time="10:42 AM" 
+            amount="-₹340" 
+            method="UPI"
+            showDivider
             onPress={() => router.push('/transaction/1')}
           />
-          <View style={styles.divider} />
-          <TransactionItem 
-            name="Salary" category="Income" method="Bank" time="09:00 AM" amount="+₹85,000" isIncome
+          <TransactionRow 
+            name="Salary" 
+            category="Income" 
+            time="09:00 AM" 
+            amount="+₹85,000" 
+            method="Bank"
+            isIncome
             onPress={() => router.push('/transaction/2')}
           />
         </Card>
 
-        {/* Date Group 2 */}
-        <Typography variant="bodyBold" color={COLORS.textMuted} style={styles.dateHeader}>
-          Yesterday
+        {/* Group 2: Yesterday */}
+        <Typography variant="caption" color={COLORS.textSecondary} style={styles.groupHeader}>
+          YESTERDAY
         </Typography>
-        <Card style={styles.transactionsCard}>
-          <TransactionItem 
-            name="Uber" category="Transport" method="Card" time="6:15 PM" amount="-₹250" 
+        <Card variant="list" style={styles.groupCard}>
+          <TransactionRow 
+            name="Uber" 
+            category="Transport" 
+            time="6:15 PM" 
+            amount="-₹250" 
+            method="Card"
+            showDivider
             onPress={() => router.push('/transaction/3')}
           />
-          <View style={styles.divider} />
-          <TransactionItem 
-            name="Netflix" category="Entertainment" method="Card" time="1:00 AM" amount="-₹649" 
+          <TransactionRow 
+            name="Netflix" 
+            category="Entertainment" 
+            time="1:00 AM" 
+            amount="-₹649" 
+            method="Card"
+            showDivider
             onPress={() => router.push('/transaction/4')}
           />
-          <View style={styles.divider} />
-          <TransactionItem 
-            name="Blinkit" category="Groceries" method="UPI" time="4:30 PM" amount="-₹1,120" 
+          <TransactionRow 
+            name="Blinkit" 
+            category="Groceries" 
+            time="4:30 PM" 
+            amount="-₹1,120" 
+            method="UPI"
             onPress={() => router.push('/transaction/5')}
           />
         </Card>
 
-        <View style={{height: 40}} />
+        {/* Group 3: Earlier */}
+        <Typography variant="caption" color={COLORS.textSecondary} style={styles.groupHeader}>
+          EARLIER THIS WEEK
+        </Typography>
+        <Card variant="list" style={styles.groupCard}>
+          <TransactionRow 
+            name="Amazon Fresh" 
+            category="Groceries" 
+            time="8 Jul, 3:15 PM" 
+            amount="-₹2,450" 
+            method="Card"
+            showDivider
+            onPress={() => router.push('/transaction/1')}
+          />
+          <TransactionRow 
+            name="Swiggy Gourmet" 
+            category="Food & Dining" 
+            time="7 Jul, 8:30 PM" 
+            amount="-₹980" 
+            method="UPI"
+            showDivider
+            onPress={() => router.push('/transaction/2')}
+          />
+          <TransactionRow 
+            name="Apollo Pharmacy" 
+            category="Health" 
+            time="6 Jul, 11:20 AM" 
+            amount="-₹540" 
+            method="Cash"
+            onPress={() => router.push('/transaction/3')}
+          />
+        </Card>
+
+        <View style={{ height: 100 }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-interface TxProps {
-  name: string; category: string; method: string; time: string; amount: string; isIncome?: boolean; onPress: () => void;
-}
-
-const TransactionItem = ({ name, category, method, time, amount, isIncome, onPress }: TxProps) => (
-  <TouchableOpacity style={styles.transactionRow} onPress={onPress} activeOpacity={0.7}>
-    <View style={styles.transactionIcon} />
-    <View style={styles.transactionDetails}>
-      <Typography variant="bodyBold">{name}</Typography>
-      <View style={styles.transactionSub}>
-        <Typography variant="caption" color={COLORS.textMuted}>{category}</Typography>
-        <Typography variant="caption" color={COLORS.textMuted} style={styles.dotSeparator}>•</Typography>
-        <Typography variant="caption" color={COLORS.textMuted}>{time}</Typography>
-      </View>
-    </View>
-    <View style={styles.amountContainer}>
-      <Typography variant="bodyBold" color={isIncome ? COLORS.success : COLORS.text}>{amount}</Typography>
-      <View style={styles.methodChip}>
-        <Typography variant="caption" color={COLORS.textMuted} style={{fontSize: 10}}>{method}</Typography>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.background,
   },
-  header: {
-    paddingTop: 12,
-    paddingBottom: 8,
+  filterSection: {
     backgroundColor: COLORS.background,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
+    paddingBottom: 16,
   },
-  title: {
+  searchWrapper: {
     paddingHorizontal: SIZES.padding,
-    marginBottom: 16,
-  },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.white,
-    marginHorizontal: SIZES.padding,
-    paddingHorizontal: 16,
-    height: 48,
-    borderRadius: 16,
-    marginBottom: 16,
-  },
-  searchInput: {
-    flex: 1,
-    marginLeft: 12,
-    fontFamily: 'Inter_400Regular',
-    fontSize: 16,
-    color: COLORS.text,
+    marginBottom: 12,
   },
   filtersContent: {
     paddingHorizontal: SIZES.padding,
-    gap: 12,
-    paddingBottom: 8,
-  },
-  filterChip: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: COLORS.white,
-  },
-  activeFilterChip: {
-    backgroundColor: COLORS.primary,
+    gap: 8,
   },
   scrollContent: {
-    padding: SIZES.padding,
+    paddingHorizontal: SIZES.padding,
+    paddingTop: 16,
   },
-  dateHeader: {
-    marginBottom: 12,
+  groupHeader: {
+    marginBottom: 8,
     marginTop: 8,
+    letterSpacing: 0.5,
+    fontWeight: '600',
   },
-  transactionsCard: {
-    paddingVertical: 8,
-    marginBottom: 24,
-  },
-  transactionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  transactionIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: COLORS.background,
-    marginRight: 16,
-  },
-  transactionDetails: {
-    flex: 1,
-  },
-  transactionSub: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  dotSeparator: {
-    marginHorizontal: 6,
-  },
-  amountContainer: {
-    alignItems: 'flex-end',
-  },
-  methodChip: {
-    backgroundColor: COLORS.background,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-    marginTop: 4,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: COLORS.border,
-    marginLeft: 60,
+  groupCard: {
+    marginBottom: SPACING.lg,
   },
 });

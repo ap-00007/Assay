@@ -1,8 +1,10 @@
 import React from 'react';
 import { View, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Typography } from '../../components/Typography';
 import { Card } from '../../components/Card';
-import { COLORS, SIZES } from '../../constants/theme';
+import { ScreenHeader } from '../../components/ui/ScreenHeader';
+import { COLORS, SIZES, SPACING } from '../../constants/theme';
 import { 
   User, 
   CreditCard, 
@@ -13,144 +15,193 @@ import {
   HelpCircle, 
   MessageSquare, 
   Info, 
-  ChevronRight 
+  ChevronRight,
+  LogOut
 } from 'lucide-react-native';
 
 export default function SettingsScreen() {
+  const router = useRouter();
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        
-        <Typography variant="h2" style={styles.title}>Settings</Typography>
+      {/* Unified Header */}
+      <ScreenHeader 
+        title="Settings" 
+        showNotification={false}
+      />
 
+      <ScrollView 
+        showsVerticalScrollIndicator={false} 
+        contentContainerStyle={styles.scrollContent}
+      >
         {/* Profile Card */}
         <Card style={styles.profileCard}>
           <View style={styles.avatar}>
-            <Typography variant="h3" color={COLORS.white}>A</Typography>
+            <Typography variant="bodyBold" color={COLORS.white} style={{ fontSize: 18 }}>
+              A
+            </Typography>
           </View>
           <View style={styles.profileInfo}>
-            <Typography variant="h3">Ashish</Typography>
-            <Typography variant="body" color={COLORS.textMuted} style={{marginTop: 4}}>
+            <Typography variant="bodyBold" style={styles.profileName}>
+              Ashish
+            </Typography>
+            <Typography variant="secondary" color={COLORS.textSecondary}>
               ashish@example.com
             </Typography>
           </View>
-          <TouchableOpacity style={styles.editBtn}>
-            <Typography variant="bodyMedium" color={COLORS.primary}>Edit</Typography>
+          <TouchableOpacity style={styles.editBtn} activeOpacity={0.7}>
+            <Typography variant="caption" color={COLORS.primary} style={{ fontWeight: '600' }}>
+              Edit
+            </Typography>
           </TouchableOpacity>
         </Card>
 
+        {/* Preferences Section */}
         <View style={styles.section}>
-          <Typography variant="bodyBold" color={COLORS.textMuted} style={styles.sectionTitle}>
+          <Typography variant="caption" color={COLORS.textSecondary} style={styles.sectionTitle}>
             PREFERENCES
           </Typography>
-          <Card style={styles.settingsListCard}>
-            <SettingRow icon={<User color={COLORS.primary} size={20} />} title="Categories" />
-            <SettingRow icon={<CreditCard color={COLORS.primary} size={20} />} title="Payment Methods" />
-            <SettingRow icon={<Bell color={COLORS.primary} size={20} />} title="Notifications" />
-            <SettingRow icon={<Shield color={COLORS.primary} size={20} />} title="Privacy" />
-            <SettingRow icon={<Palette color={COLORS.primary} size={20} />} title="Appearance" />
-            <SettingRow icon={<Globe color={COLORS.primary} size={20} />} title="Language" isLast />
+          <Card variant="list" style={styles.settingsListCard}>
+            <SettingRow icon={<User color={COLORS.primary} size={18} strokeWidth={1.8} />} title="Categories" />
+            <SettingRow icon={<CreditCard color={COLORS.primary} size={18} strokeWidth={1.8} />} title="Payment Methods" />
+            <SettingRow icon={<Bell color={COLORS.primary} size={18} strokeWidth={1.8} />} title="Notifications" />
+            <SettingRow icon={<Shield color={COLORS.primary} size={18} strokeWidth={1.8} />} title="Privacy" />
+            <SettingRow icon={<Palette color={COLORS.primary} size={18} strokeWidth={1.8} />} title="Appearance" />
+            <SettingRow icon={<Globe color={COLORS.primary} size={18} strokeWidth={1.8} />} title="Language" isLast />
           </Card>
         </View>
 
+        {/* Support Section */}
         <View style={styles.section}>
-          <Typography variant="bodyBold" color={COLORS.textMuted} style={styles.sectionTitle}>
+          <Typography variant="caption" color={COLORS.textSecondary} style={styles.sectionTitle}>
             SUPPORT
           </Typography>
-          <Card style={styles.settingsListCard}>
-            <SettingRow icon={<HelpCircle color={COLORS.primary} size={20} />} title="Help Center" />
-            <SettingRow icon={<MessageSquare color={COLORS.primary} size={20} />} title="Send Feedback" />
-            <SettingRow icon={<Info color={COLORS.primary} size={20} />} title="About Assay" isLast />
+          <Card variant="list" style={styles.settingsListCard}>
+            <SettingRow icon={<HelpCircle color={COLORS.primary} size={18} strokeWidth={1.8} />} title="Help Center" />
+            <SettingRow icon={<MessageSquare color={COLORS.primary} size={18} strokeWidth={1.8} />} title="Send Feedback" />
+            <SettingRow icon={<Info color={COLORS.primary} size={18} strokeWidth={1.8} />} title="About Assay" isLast />
           </Card>
         </View>
 
-        <TouchableOpacity style={styles.logoutBtn}>
-          <Typography variant="bodyMedium" color={COLORS.error}>Log Out</Typography>
+        {/* Log Out */}
+        <TouchableOpacity 
+          style={styles.logoutBtn} 
+          activeOpacity={0.7}
+          onPress={() => router.replace('/')}
+        >
+          <LogOut color={COLORS.error} size={16} strokeWidth={1.8} />
+          <Typography variant="bodyMedium" color={COLORS.error} style={{ marginLeft: 8 }}>
+            Log Out
+          </Typography>
         </TouchableOpacity>
 
-        <View style={{height: 60}} />
+        <View style={{ height: 100 }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const SettingRow = ({ icon, title, isLast = false }: { icon: React.ReactNode, title: string, isLast?: boolean }) => (
-  <TouchableOpacity style={[styles.settingRow, !isLast && styles.settingRowBorder]}>
+const SettingRow = ({ 
+  icon, 
+  title, 
+  isLast = false 
+}: { 
+  icon: React.ReactNode; 
+  title: string; 
+  isLast?: boolean;
+}) => (
+  <TouchableOpacity style={[styles.settingRow, !isLast && styles.settingRowBorder]} activeOpacity={0.7}>
     <View style={styles.settingIconWrapper}>
       {icon}
     </View>
-    <Typography variant="bodyMedium" style={styles.settingTitle}>{title}</Typography>
-    <ChevronRight color={COLORS.border} size={20} />
+    <Typography variant="bodyMedium" style={styles.settingTitle}>
+      {title}
+    </Typography>
+    <ChevronRight color={COLORS.textSecondary} size={18} strokeWidth={1.8} />
   </TouchableOpacity>
 );
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.background,
   },
   scrollContent: {
-    padding: SIZES.padding,
-    paddingTop: 12,
-  },
-  title: {
-    marginBottom: 24,
+    paddingHorizontal: SIZES.padding,
+    paddingTop: 8,
   },
   profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: SPACING.xl,
+    padding: 16,
   },
   avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 14,
   },
   profileInfo: {
     flex: 1,
   },
+  profileName: {
+    fontSize: 16,
+    marginBottom: 2,
+  },
   editBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
     backgroundColor: COLORS.background,
-    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 12,
   },
   section: {
-    marginBottom: 32,
+    marginBottom: SPACING.xl,
   },
   sectionTitle: {
-    marginBottom: 12,
-    marginLeft: 8,
+    marginBottom: 8,
+    marginLeft: 4,
+    letterSpacing: 0.5,
+    fontWeight: '600',
   },
   settingsListCard: {
-    padding: 0,
+    marginBottom: 0,
   },
   settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
   },
   settingRowBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.background,
+    borderBottomColor: COLORS.border,
   },
   settingIconWrapper: {
     width: 36,
     height: 36,
-    borderRadius: 12,
+    borderRadius: 10,
     backgroundColor: COLORS.background,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 14,
   },
   settingTitle: {
     flex: 1,
+    fontSize: 15,
   },
   logoutBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    justifyContent: 'center',
+    paddingVertical: 14,
+    marginTop: 8,
   },
 });

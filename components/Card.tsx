@@ -1,44 +1,72 @@
 import React from 'react';
-import { View, ViewProps, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+import { View, ViewProps, StyleSheet, StyleProp, ViewStyle, TouchableOpacity, TouchableOpacityProps } from 'react-native';
 import { COLORS, SIZES, SHADOWS } from '../constants/theme';
 
-interface CardProps extends ViewProps {
-  variant?: 'primary' | 'white' | 'glass';
+export interface CardProps extends ViewProps {
+  variant?: 'default' | 'white' | 'hero' | 'primary' | 'list' | 'insight' | 'interactive';
+  onPress?: () => void;
   style?: StyleProp<ViewStyle>;
 }
 
-export function Card({ variant = 'white', style, children, ...props }: CardProps) {
+export function Card({ variant = 'default', onPress, style, children, ...props }: CardProps) {
+  const isInteractive = Boolean(onPress) || variant === 'interactive';
+
+  const containerStyle = [
+    styles.card,
+    (variant === 'default' || variant === 'white') && styles.defaultCard,
+    (variant === 'hero' || variant === 'primary') && styles.heroCard,
+    variant === 'list' && styles.listCard,
+    variant === 'insight' && styles.insightCard,
+    style,
+  ];
+
+  if (isInteractive) {
+    return (
+      <TouchableOpacity
+        style={containerStyle}
+        onPress={onPress}
+        activeOpacity={0.75}
+        {...(props as TouchableOpacityProps)}
+      >
+        {children}
+      </TouchableOpacity>
+    );
+  }
+
   return (
-    <View
-      style={[
-        styles.card,
-        variant === 'white' && styles.whiteCard,
-        variant === 'primary' && styles.primaryCard,
-        variant === 'glass' && styles.glassCard,
-        style,
-      ]}
-      {...props}
-    >
+    <View style={containerStyle} {...props}>
       {children}
     </View>
   );
 }
 
+export const AppCard = Card;
+
 const styles = StyleSheet.create({
   card: {
-    borderRadius: SIZES.largeRadius,
-    padding: SIZES.padding,
+    borderRadius: SIZES.cardRadius,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    padding: 20,
     ...SHADOWS.soft,
   },
-  whiteCard: {
-    backgroundColor: COLORS.white,
+  defaultCard: {
+    backgroundColor: COLORS.surface,
+    borderColor: COLORS.border,
   },
-  primaryCard: {
+  heroCard: {
     backgroundColor: COLORS.primary,
+    borderColor: 'transparent',
+    borderRadius: SIZES.heroRadius,
+    padding: SIZES.padding,
+    ...SHADOWS.medium,
   },
-  glassCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    borderWidth: 1,
+  listCard: {
+    padding: 0,
+    overflow: 'hidden',
+  },
+  insightCard: {
+    padding: 16,
   },
 });
