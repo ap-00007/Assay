@@ -3,6 +3,7 @@ import { View, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Typography } from '../../components/Typography';
+import { ProfileAvatar } from '../../components/profile/ProfileAvatar';
 import { COLORS } from '../../constants/theme';
 import { 
   LayoutGrid, 
@@ -78,9 +79,7 @@ export default function SettingsScreen() {
           activeOpacity={0.8}
           onPress={() => router.push('/settings/profile')}
         >
-          <View style={styles.avatar}>
-            <User color="#475569" size={28} />
-          </View>
+          <ProfileAvatar size={48} seed="Ashish" style={{ marginRight: 12 }} />
 
           <View style={styles.profileInfo}>
             <Typography variant="bodyBold" style={styles.userName}>

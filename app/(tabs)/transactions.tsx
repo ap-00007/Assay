@@ -29,6 +29,7 @@ const TRANSACTIONS_DATA: DateGroup[] = [
     items: [
       { id: 'tx-1', name: 'Starbucks', merchantKey: 'starbucks', time: '9:42 AM', method: 'UPI', amount: '₹250', category: 'Food & Dining', notes: 'Morning coffee ☕' },
       { id: 'tx-2', name: 'Uber', merchantKey: 'uber', time: '8:20 AM', method: 'UPI', amount: '₹120', category: 'Transport', notes: 'Ride to office' },
+      { id: 'tx-8', name: 'Blinkit', merchantKey: 'blinkit', time: '7:45 AM', method: 'UPI', amount: '₹340', category: 'Groceries', notes: 'Breakfast supplies' },
     ],
   },
   {
@@ -36,6 +37,7 @@ const TRANSACTIONS_DATA: DateGroup[] = [
     items: [
       { id: 'tx-3', name: 'Amazon', merchantKey: 'amazon', time: '6:10 PM', method: 'Card', amount: '₹899', category: 'Shopping', notes: 'Office electronics' },
       { id: 'tx-4', name: 'Tea Stall', merchantKey: 'tea', time: '4:30 PM', method: 'Cash', amount: '₹30', category: 'Food & Dining', notes: 'Evening chai' },
+      { id: 'tx-9', name: 'Netflix', merchantKey: 'netflix', time: '1:15 PM', method: 'Card', amount: '₹649', category: 'Entertainment', notes: 'Monthly 4K plan' },
     ],
   },
   {
@@ -43,12 +45,14 @@ const TRANSACTIONS_DATA: DateGroup[] = [
     items: [
       { id: 'tx-5', name: 'Swiggy', merchantKey: 'swiggy', time: '8:10 PM', method: 'UPI', amount: '₹430', category: 'Food & Dining', notes: 'Dinner order' },
       { id: 'tx-6', name: 'BookMyShow', merchantKey: 'bookmyshow', time: '5:12 PM', method: 'UPI', amount: '₹620', category: 'Entertainment', notes: 'Weekend movie' },
+      { id: 'tx-10', name: 'Zomato', merchantKey: 'zomato', time: '1:30 PM', method: 'UPI', amount: '₹280', category: 'Food & Dining', notes: 'Lunch order' },
     ],
   },
   {
     date: 'Mon, 24 Jun',
     items: [
       { id: 'tx-7', name: 'Metro Card', merchantKey: 'metro', time: '10:02 AM', method: 'Wallet', amount: '₹200', category: 'Transport', notes: 'Metro recharge' },
+      { id: 'tx-11', name: 'Spotify', merchantKey: 'spotify', time: '9:00 AM', method: 'Card', amount: '₹119', category: 'Entertainment', notes: 'Premium individual' },
     ],
   },
 ];

@@ -1,0 +1,42 @@
+// Static asset map for alohe/avatars Memojis (35 diverse 3D avatars)
+// Pure local offline assets for zero-latency instant rendering
+
+export const MEMOJI_ASSETS: Record<number, any> = {
+  1: require('../assets/avatars/memo_1.png'),
+  2: require('../assets/avatars/memo_2.png'),
+  3: require('../assets/avatars/memo_3.png'),
+  4: require('../assets/avatars/memo_4.png'),
+  5: require('../assets/avatars/memo_5.png'),
+  6: require('../assets/avatars/memo_6.png'),
+  7: require('../assets/avatars/memo_7.png'),
+  8: require('../assets/avatars/memo_8.png'),
+  9: require('../assets/avatars/memo_9.png'),
+  10: require('../assets/avatars/memo_10.png'),
+  11: require('../assets/avatars/memo_11.png'),
+  12: require('../assets/avatars/memo_12.png'),
+  13: require('../assets/avatars/memo_13.png'),
+  14: require('../assets/avatars/memo_14.png'),
+  15: require('../assets/avatars/memo_15.png'),
+  16: require('../assets/avatars/memo_16.png'),
+  17: require('../assets/avatars/memo_17.png'),
+  18: require('../assets/avatars/memo_18.png'),
+  19: require('../assets/avatars/memo_19.png'),
+  20: require('../assets/avatars/memo_20.png'),
+  21: require('../assets/avatars/memo_21.png'),
+  22: require('../assets/avatars/memo_22.png'),
+  23: require('../assets/avatars/memo_23.png'),
+  24: require('../assets/avatars/memo_24.png'),
+  25: require('../assets/avatars/memo_25.png'),
+  26: require('../assets/avatars/memo_26.png'),
+  27: require('../assets/avatars/memo_27.png'),
+  28: require('../assets/avatars/memo_28.png'),
+  29: require('../assets/avatars/memo_29.png'),
+  30: require('../assets/avatars/memo_30.png'),
+  31: require('../assets/avatars/memo_31.png'),
+  32: require('../assets/avatars/memo_32.png'),
+  33: require('../assets/avatars/memo_33.png'),
+  34: require('../assets/avatars/memo_34.png'),
+  35: require('../assets/avatars/memo_35.png'),
+};
+
+export const TOTAL_MEMOJIS = 35;

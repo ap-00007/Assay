@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Typography } from '../Typography';
 import { COLORS, SIZES } from '../../constants/theme';
+import { MerchantLogo } from './MerchantLogo';
 import { 
   Coffee, 
   ShoppingBag, 
@@ -74,9 +75,13 @@ export function TransactionRow({
         activeOpacity={0.7}
         disabled={!onPress}
       >
-        <View style={[styles.iconWrapper, isFormattedIncome && styles.incomeIconWrapper]}>
-          {getCategoryIcon()}
-        </View>
+        {isFormattedIncome ? (
+          <View style={[styles.iconWrapper, styles.incomeIconWrapper]}>
+            <ArrowDownLeft color={COLORS.success} size={18} strokeWidth={2} />
+          </View>
+        ) : (
+          <MerchantLogo name={name} size={42} style={{ marginRight: 12 }} />
+        )}
 
         <View style={styles.details}>
           <Typography variant="bodyBold" numberOfLines={1} style={styles.name}>

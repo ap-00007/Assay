@@ -1,158 +1,150 @@
-import React from 'react';
-import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+import React, { useState } from 'react';
+import { View, Image, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { Typography } from '../Typography';
+import { COLORS } from '../../constants/theme';
+import { getBrandLogoSource } from '../../constants/brandLogos';
 import { 
   Coffee, 
   Car, 
   Utensils, 
   Train, 
   Dumbbell, 
-  Landmark
+  Landmark,
+  ShoppingBag,
+  CreditCard
 } from 'lucide-react-native';
 
 export interface MerchantLogoProps {
   name: string;
   size?: number;
+  domain?: string;
   style?: StyleProp<ViewStyle>;
 }
 
-export function MerchantLogo({ name, size = 42, style }: MerchantLogoProps) {
-  const normalized = (name || '').toLowerCase();
+// Optional helper to resolve domain for unbundled merchants
+function guessDomain(name: string): string | null {
+  const norm = (name || '').toLowerCase().trim();
+  if (norm.includes('zara')) return 'zara.com';
+  if (norm.includes('h&m') || norm.includes('hm')) return 'hm.com';
+  if (norm.includes('decathlon')) return 'decathlon.in';
+  if (norm.includes('mcdonald')) return 'mcdonalds.com';
+  if (norm.includes('domino')) return 'dominos.co.in';
+  if (norm.includes('kfc')) return 'kfc.com';
+  if (norm.includes('pizza hut')) return 'pizzahut.co.in';
+  if (norm.includes('subway')) return 'subway.com';
+  if (norm.includes('irctc')) return 'irctc.co.in';
+  if (norm.includes('indigo')) return 'goindigo.in';
+  if (norm.includes('air india')) return 'airindia.com';
+  return null;
+}
 
-  // ICICI Bank
-  if (normalized.includes('icici')) {
+export function MerchantLogo({ name, size = 42, domain, style }: MerchantLogoProps) {
+  const [remoteFailed, setRemoteFailed] = useState(false);
+  const normalized = (name || '').toLowerCase().trim();
+
+  // 1. High-Resolution Curated Local Asset (Standardized 1:1 Square with safe margin)
+  const localSource = getBrandLogoSource(normalized);
+  if (localSource) {
     return (
-      <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: '#FFF5F0', borderColor: '#FDBA74' }, style]}>
-        <Typography variant="bodyBold" style={{ color: '#C2410C', fontSize: size * 0.45, fontStyle: 'italic', fontWeight: '900' }}>
-          i
-        </Typography>
+      <View 
+        style={[
+          styles.container, 
+          { 
+            width: size, 
+            height: size, 
+            borderRadius: size / 2, 
+            backgroundColor: '#FFFFFF',
+            borderColor: 'rgba(0, 0, 0, 0.08)' 
+          }, 
+          style
+        ]}
+      >
+        <Image 
+          source={localSource} 
+          style={{ width: size, height: size }} 
+          resizeMode="contain" 
+        />
       </View>
     );
   }
 
-  // Axis Bank
-  if (normalized.includes('axis')) {
+  // 2. Dynamic Domain Favicon (for long-tail merchants)
+  const targetDomain = domain || guessDomain(normalized);
+  if (targetDomain && !remoteFailed) {
+    const remoteUrl = `https://www.google.com/s2/favicons?domain=${targetDomain}&sz=128`;
+    const innerSize = Math.round(size * 0.68);
     return (
-      <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: '#FFF1F2', borderColor: '#FECDD3' }, style]}>
-        <View style={{ width: 0, height: 0, borderLeftWidth: size * 0.22, borderRightWidth: size * 0.22, borderBottomWidth: size * 0.38, borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: '#9F1239', transform: [{ rotate: '15deg' }] }} />
+      <View 
+        style={[
+          styles.container, 
+          { 
+            width: size, 
+            height: size, 
+            borderRadius: size / 2, 
+            backgroundColor: '#FFFFFF',
+            borderColor: 'rgba(0, 0, 0, 0.08)' 
+          }, 
+          style
+        ]}
+      >
+        <Image 
+          source={{ uri: remoteUrl }} 
+          style={{ width: innerSize, height: innerSize }} 
+          resizeMode="contain" 
+          onError={() => setRemoteFailed(true)}
+        />
       </View>
     );
   }
 
-  // HDFC Bank / HDFC Credila
-  if (normalized.includes('hdfc')) {
-    return (
-      <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: '#EFF6FF', borderColor: '#BFDBFE' }, style]}>
-        <View style={{ width: size * 0.52, height: size * 0.52, backgroundColor: '#1E3A8A', borderRadius: 4, justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ width: size * 0.24, height: size * 0.24, backgroundColor: '#DC2626', borderRadius: 2 }} />
-        </View>
-      </View>
-    );
-  }
-
-  // State Bank of India (SBI)
-  if (normalized.includes('sbi') || normalized.includes('state bank')) {
-    return (
-      <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: '#EFF6FF', borderColor: '#BFDBFE' }, style]}>
-        <View style={{ width: size * 0.6, height: size * 0.6, borderRadius: size * 0.3, backgroundColor: '#0284C7', justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ width: size * 0.2, height: size * 0.2, borderRadius: size * 0.1, backgroundColor: '#FFFFFF' }} />
-          <View style={{ position: 'absolute', bottom: 2, width: size * 0.08, height: size * 0.22, backgroundColor: '#FFFFFF' }} />
-        </View>
-      </View>
-    );
-  }
-
-  // Starbucks
-  if (normalized.includes('starbucks')) {
-    return (
-      <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: '#006241' }, style]}>
-        <Coffee color="#FFFFFF" size={size * 0.52} strokeWidth={2} />
-      </View>
-    );
-  }
-
-  // Uber
-  if (normalized.includes('uber')) {
-    return (
-      <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: '#1A6B51' }, style]}>
-        <Car color="#FFFFFF" size={size * 0.52} strokeWidth={2} />
-      </View>
-    );
-  }
-
-  // Amazon
-  if (normalized.includes('amazon')) {
-    return (
-      <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: '#0F172A' }, style]}>
-        <Typography variant="bodyBold" style={{ color: '#FF9900', fontSize: size * 0.45, fontWeight: '900' }}>
-          a
-        </Typography>
-      </View>
-    );
-  }
-
-  // Tea Stall
+  // 3. Category Fallbacks for generic or local cash vendors
   if (normalized.includes('tea') || normalized.includes('chai')) {
     return (
       <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: '#FEF3C7', borderColor: '#FDE68A' }, style]}>
-        <Coffee color="#B45309" size={size * 0.52} strokeWidth={2} />
+        <Coffee color="#B45309" size={size * 0.5} strokeWidth={2} />
       </View>
     );
   }
 
-  // Swiggy
-  if (normalized.includes('swiggy')) {
+  if (normalized.includes('coffee') || normalized.includes('cafe')) {
     return (
-      <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: '#FC8019' }, style]}>
-        <Utensils color="#FFFFFF" size={size * 0.52} strokeWidth={2} />
+      <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: '#EFF6FF', borderColor: '#BFDBFE' }, style]}>
+        <Coffee color="#2563EB" size={size * 0.5} strokeWidth={2} />
       </View>
     );
   }
 
-  // BookMyShow
-  if (normalized.includes('bookmyshow')) {
+  if (normalized.includes('cab') || normalized.includes('auto') || normalized.includes('taxi')) {
     return (
-      <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: '#0F172A' }, style]}>
-        <Typography variant="caption" style={{ color: '#DC2626', fontWeight: '900', fontSize: size * 0.28 }}>
-          my
-        </Typography>
+      <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: '#F0FDF4', borderColor: '#BBF7D0' }, style]}>
+        <Car color="#16A34A" size={size * 0.5} strokeWidth={2} />
       </View>
     );
   }
 
-  // Metro Card
-  if (normalized.includes('metro')) {
+  if (normalized.includes('food') || normalized.includes('restaurant') || normalized.includes('dine')) {
     return (
-      <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: '#2563EB' }, style]}>
-        <Train color="#FFFFFF" size={size * 0.52} strokeWidth={2} />
+      <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: '#FFF7ED', borderColor: '#FED7AA' }, style]}>
+        <Utensils color="#EA580C" size={size * 0.5} strokeWidth={2} />
       </View>
     );
   }
 
-  // Netflix
-  if (normalized.includes('netflix')) {
-    return (
-      <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: '#000000' }, style]}>
-        <Typography variant="bodyBold" style={{ color: '#E50914', fontSize: size * 0.5, fontWeight: '900' }}>
-          N
-        </Typography>
-      </View>
-    );
-  }
-
-  // Cult / Gym
-  if (normalized.includes('cult') || normalized.includes('gym')) {
+  if (normalized.includes('bank') || normalized.includes('loan') || normalized.includes('interest')) {
     return (
       <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: '#F8FAFC', borderColor: '#E2E8F0' }, style]}>
-        <Dumbbell color="#FF3278" size={size * 0.5} strokeWidth={2} />
+        <Landmark color="#475569" size={size * 0.5} strokeWidth={1.8} />
       </View>
     );
   }
 
-  // Fallback / default
+  // 4. Default Monogram
+  const initial = (name || '?').charAt(0).toUpperCase();
   return (
-    <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: '#F3F4F6', borderColor: '#E5E7EB' }, style]}>
-      <Landmark color="#4B5563" size={size * 0.5} strokeWidth={1.8} />
+    <View style={[styles.container, { width: size, height: size, borderRadius: size / 2, backgroundColor: '#F1F5F9', borderColor: '#E2E8F0' }, style]}>
+      <Typography variant="bodyBold" style={{ color: '#334155', fontSize: size * 0.44, fontWeight: '700' }}>
+        {initial}
+      </Typography>
     </View>
   );
 }
@@ -162,6 +154,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'transparent',
+    overflow: 'hidden',
   },
 });

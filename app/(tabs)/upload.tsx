@@ -3,6 +3,7 @@ import { View, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Typography } from '../../components/Typography';
+import { MerchantLogo } from '../../components/ui/MerchantLogo';
 import { COLORS, SIZES, FONTS } from '../../constants/theme';
 import { 
   Camera, 
@@ -161,7 +162,7 @@ export default function UploadScreen() {
               pathname: '/transaction/[id]',
               params: {
                 id: item.id,
-                name: item.title.replace(' Receipt', '').replace(' Ride', '').replace(' Purchase', ''),
+                name: item.title.replace(' Receipt', '').replace(' Ride', '').replace(' Purchase', '').replace(' Groceries', '').replace(' Gourmet', ''),
                 merchantKey: item.merchant,
                 amount: item.amount,
                 time: item.time,
@@ -171,13 +172,8 @@ export default function UploadScreen() {
               }
             })}
           >
-            {/* Receipt Thumbnail Mock */}
-            <View style={styles.receiptThumbnail}>
-              <View style={styles.thumbnailHeader} />
-              <View style={styles.thumbnailLine1} />
-              <View style={styles.thumbnailLine2} />
-              <View style={styles.thumbnailLine3} />
-            </View>
+            {/* Standardized Brand Logo */}
+            <MerchantLogo name={item.merchant} size={46} style={{ marginRight: 14 }} />
 
             <View style={styles.uploadInfo}>
               <Typography variant="bodyBold" style={styles.uploadTitle}>
@@ -283,42 +279,6 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     padding: 14,
     marginBottom: 12,
-  },
-  receiptThumbnail: {
-    width: 54,
-    height: 64,
-    backgroundColor: '#F3F4F6',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    padding: 8,
-    marginRight: 14,
-    justifyContent: 'space-around',
-  },
-  thumbnailHeader: {
-    width: 24,
-    height: 4,
-    backgroundColor: '#9CA3AF',
-    borderRadius: 2,
-    alignSelf: 'center',
-  },
-  thumbnailLine1: {
-    width: '100%',
-    height: 3,
-    backgroundColor: '#D1D5DB',
-    borderRadius: 2,
-  },
-  thumbnailLine2: {
-    width: '75%',
-    height: 3,
-    backgroundColor: '#D1D5DB',
-    borderRadius: 2,
-  },
-  thumbnailLine3: {
-    width: '50%',
-    height: 3,
-    backgroundColor: '#D1D5DB',
-    borderRadius: 2,
   },
   uploadInfo: {
     flex: 1,
