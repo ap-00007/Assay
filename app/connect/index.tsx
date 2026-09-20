@@ -7,6 +7,7 @@ import {
   Platform,
   StatusBar,
   Text,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -24,22 +25,38 @@ import {
   X,
   FileCheck2,
   RefreshCw,
+  Building2,
+  Smartphone,
+  KeyRound,
+  Check,
+  ExternalLink,
+  ChevronRight,
+  Info,
 } from 'lucide-react-native';
 import { Typography } from '../../components/Typography';
 import { Button } from '../../components/Button';
 import { AASandboxBadge } from '../../components/aa/AASandboxBadge';
 import { BankCardItem } from '../../components/aa/BankCardItem';
-import { FetchingStepItem, StepStatus } from '../../components/aa/FetchingStepItem';
+import { FetchingStepItem } from '../../components/aa/FetchingStepItem';
+import { MerchantLogo } from '../../components/ui/MerchantLogo';
 import { COLORS, SIZES, SPACING, FONTS } from '../../constants/theme';
 import { SANDBOX_ACCOUNTS, SandboxAccount } from '../../types/aa';
+import { AAService, useAAState } from '../../services/aaState';
 
 type FlowStep = 1 | 2 | 3 | 4 | 5;
+type SandboxSubStep = 'phone' | 'otp' | 'bank_select' | 'account_confirm';
 
 export default function AccountAggregatorFlow() {
   const router = useRouter();
+  const aaState = useAAState();
 
   const [currentStep, setCurrentStep] = useState<FlowStep>(1);
   const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>(['acc-hdfc-4821']);
+
+  // AA Gateway simulator internal states
+  const [sandboxSubStep, setSandboxSubStep] = useState<SandboxSubStep>('phone');
+  const [otpCode, setOtpCode] = useState<string>('849201');
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState<boolean>(false);
 
   // Screen 4 pipeline state
   const [fetchStage, setFetchStage] = useState<number>(0);
@@ -90,8 +107,23 @@ export default function AccountAggregatorFlow() {
     }
   }, [currentStep]);
 
-  const selectedAccountsCount = selectedAccountIds.length;
+  const selectedAccounts = SANDBOX_ACCOUNTS.filter((acc) =>
+    selectedAccountIds.includes(acc.id)
+  );
+  const selectedAccountsCount = selectedAccounts.length > 0 ? selectedAccounts.length : 1;
   const totalImportedTransactions = selectedAccountsCount * 171;
+
+  // Handle "Set Up Later"
+  const handleSetUpLater = () => {
+    AAService.skipOnboarding();
+    router.replace('/(tabs)');
+  };
+
+  // Handle Complete Onboarding & View Financial Health
+  const handleFinishOnboarding = () => {
+    AAService.completeOnboarding(selectedAccounts);
+    router.replace('/(tabs)');
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -107,8 +139,10 @@ export default function AccountAggregatorFlow() {
             onPress={() => {
               if (currentStep > 1 && currentStep < 4) {
                 setCurrentStep((prev) => (prev - 1) as FlowStep);
+              } else if (currentStep === 1) {
+                handleSetUpLater();
               } else {
-                router.back();
+                router.replace('/(tabs)');
               }
             }}
             style={styles.backButton}
@@ -124,167 +158,176 @@ export default function AccountAggregatorFlow() {
 
           <View style={styles.stepPill}>
             <Text style={styles.stepPillText}>
-              STEP {currentStep} OF 5
+              {currentStep === 1 && 'ONBOARDING'}
+              {currentStep === 2 && 'CONSENT REVIEW'}
+              {currentStep === 3 && 'AA GATEWAY (SANDBOX)'}
+              {currentStep === 4 && 'DATA PIPELINE'}
+              {currentStep === 5 && 'COMPLETED'}
             </Text>
           </View>
 
           <TouchableOpacity
-            onPress={() => router.replace('/(tabs)')}
-            style={styles.closeButton}
+            onPress={handleSetUpLater}
+            style={styles.skipButton}
             activeOpacity={0.7}
           >
-            <X size={18} color={COLORS.textSecondary} strokeWidth={2} />
+            <Text style={styles.skipButtonText}>
+              {currentStep === 1 ? 'Later' : 'Close'}
+            </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Global Sandbox Demo Flag */}
-        <AASandboxBadge label="RBI ACCOUNT AGGREGATOR • SANDBOX DEMO" />
-
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            SCREEN 1 — CONNECT ACCOUNT
+            SCREEN 1 — FIRST-TIME AA INTRO
             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {currentStep === 1 && (
           <View style={styles.stepContainer}>
             <View style={styles.headerSection}>
               <Typography variant="pageTitle" style={styles.pageTitle}>
-                Connect your accounts
+                Connect your finances
               </Typography>
               <Typography variant="body" color={COLORS.textSecondary} style={styles.subtitle}>
-                Securely bring your financial information into ASSAY.
+                Give ASSAY the financial context it needs to understand your spending, cash flow and financial health.
               </Typography>
             </View>
 
-            {/* Explanation Card */}
-            <View style={styles.explanationCard}>
-              <View style={styles.explanationHeader}>
-                <FileCheck2 size={20} color={COLORS.gold} strokeWidth={2} />
+            {/* Three Concise Key Benefits */}
+            <View style={styles.benefitsCard}>
+              <View style={styles.benefitRow}>
+                <View style={styles.checkIconCircle}>
+                  <Check size={16} color={COLORS.gold} strokeWidth={2.8} />
+                </View>
+                <View style={styles.benefitTextCol}>
+                  <Typography variant="bodyBold" color={COLORS.primary} style={styles.benefitTitle}>
+                    Understand your spending
+                  </Typography>
+                  <Typography variant="secondary" color={COLORS.textSecondary}>
+                    Deep categorization, merchant intelligence, and automated leak detection.
+                  </Typography>
+                </View>
+              </View>
+
+              <View style={styles.benefitDivider} />
+
+              <View style={styles.benefitRow}>
+                <View style={styles.checkIconCircle}>
+                  <Check size={16} color={COLORS.gold} strokeWidth={2.8} />
+                </View>
+                <View style={styles.benefitTextCol}>
+                  <Typography variant="bodyBold" color={COLORS.primary} style={styles.benefitTitle}>
+                    Forecast upcoming cash flow
+                  </Typography>
+                  <Typography variant="secondary" color={COLORS.textSecondary}>
+                    Predictive balance trajectory accounting for recurring commitments and income.
+                  </Typography>
+                </View>
+              </View>
+
+              <View style={styles.benefitDivider} />
+
+              <View style={styles.benefitRow}>
+                <View style={styles.checkIconCircle}>
+                  <Check size={16} color={COLORS.gold} strokeWidth={2.8} />
+                </View>
+                <View style={styles.benefitTextCol}>
+                  <Typography variant="bodyBold" color={COLORS.primary} style={styles.benefitTitle}>
+                    Get personalized financial insights
+                  </Typography>
+                  <Typography variant="secondary" color={COLORS.textSecondary}>
+                    Clear recommendations tailored to your actual observed cash flows.
+                  </Typography>
+                </View>
+              </View>
+            </View>
+
+            {/* Privacy / Trust Section */}
+            <View style={styles.trustBox}>
+              <View style={styles.trustHeader}>
+                <ShieldCheck size={18} color={COLORS.success} strokeWidth={2} />
                 <Typography variant="bodySemiBold" color={COLORS.primary}>
                   Consent-Based Architecture
                 </Typography>
               </View>
-              <Typography variant="body" color={COLORS.primary} style={styles.explanationText}>
-                ASSAY uses consent-based financial data access to understand your spending, income and cash flow.
+              <Typography variant="secondary" color={COLORS.textSecondary} style={styles.trustText}>
+                Your data is accessed only with your consent. ASSAY uses consent-based financial data access in compliance with RBI regulations.
               </Typography>
             </View>
 
-            {/* Three Key Benefits */}
-            <View style={styles.benefitsCard}>
-              <Typography variant="caption" color={COLORS.textSecondary} style={styles.benefitsTitle}>
-                WHAT YOU UNLOCK
-              </Typography>
-
-              <View style={styles.benefitRow}>
-                <View style={styles.benefitIconCircle}>
-                  <LineChart size={18} color={COLORS.primary} strokeWidth={2} />
-                </View>
-                <View style={styles.benefitTextCol}>
-                  <Typography variant="bodySemiBold" color={COLORS.primary}>
-                    Spending analysis
-                  </Typography>
-                  <Typography variant="secondary" color={COLORS.textSecondary}>
-                    Deep transaction categorization and leak detection across all accounts.
-                  </Typography>
-                </View>
-              </View>
-
-              <View style={styles.benefitDivider} />
-
-              <View style={styles.benefitRow}>
-                <View style={styles.benefitIconCircle}>
-                  <TrendingUp size={18} color={COLORS.primary} strokeWidth={2} />
-                </View>
-                <View style={styles.benefitTextCol}>
-                  <Typography variant="bodySemiBold" color={COLORS.primary}>
-                    Cash-flow forecasting
-                  </Typography>
-                  <Typography variant="secondary" color={COLORS.textSecondary}>
-                    Predictive balance trajectory accounting for recurring commitments.
-                  </Typography>
-                </View>
-              </View>
-
-              <View style={styles.benefitDivider} />
-
-              <View style={styles.benefitRow}>
-                <View style={styles.benefitIconCircle}>
-                  <Lightbulb size={18} color={COLORS.gold} strokeWidth={2} />
-                </View>
-                <View style={styles.benefitTextCol}>
-                  <Typography variant="bodySemiBold" color={COLORS.primary}>
-                    Personalized recommendations
-                  </Typography>
-                  <Typography variant="secondary" color={COLORS.textSecondary}>
-                    Targeted insights to optimize liquidity and eliminate unnecessary spend.
-                  </Typography>
-                </View>
-              </View>
+            {/* Primary & Secondary Action CTAs */}
+            <View style={styles.actionGroup}>
+              <Button
+                title="Connect Account"
+                variant="primary"
+                size="lg"
+                onPress={() => setCurrentStep(2)}
+                style={styles.mainCta}
+              />
+              <Button
+                title="Set Up Later"
+                variant="secondary"
+                size="md"
+                onPress={handleSetUpLater}
+                style={styles.secondaryCta}
+              />
             </View>
-
-            {/* Privacy Note */}
-            <View style={styles.privacyNoteRow}>
-              <ShieldCheck size={16} color={COLORS.success} strokeWidth={2} />
-              <Typography variant="secondary" color={COLORS.textSecondary} style={styles.privacyNoteText}>
-                You control what information is shared.
-              </Typography>
-            </View>
-
-            {/* CTA */}
-            <Button
-              title="Continue"
-              variant="primary"
-              size="lg"
-              onPress={() => setCurrentStep(2)}
-              style={styles.mainCta}
-            />
           </View>
         )}
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            SCREEN 2 — CONSENT
+            SCREEN 2 — CONSENT SCREEN
             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {currentStep === 2 && (
           <View style={styles.stepContainer}>
             <View style={styles.headerSection}>
               <Typography variant="pageTitle" style={styles.pageTitle}>
-                Review access
+                Review your access
               </Typography>
               <Typography variant="body" color={COLORS.textSecondary} style={styles.subtitle}>
-                Review the consent parameters requested by ASSAY before continuing.
+                Review the consent parameters requested by ASSAY before proceeding to the Account Aggregator gateway.
               </Typography>
             </View>
 
             {/* Consent Details Card */}
             <View style={styles.consentCard}>
-              {/* Financial Information */}
+              {/* Data Requested */}
               <View style={styles.consentSection}>
                 <Typography variant="caption" color={COLORS.textSecondary} style={styles.sectionHeading}>
-                  FINANCIAL INFORMATION REQUESTED
+                  DATA REQUESTED
                 </Typography>
+                
                 <View style={styles.checkItem}>
                   <CheckCircle2 size={18} color={COLORS.success} strokeWidth={2.2} />
                   <Typography variant="bodyMedium" color={COLORS.primary} style={styles.checkText}>
-                    Account balance
+                    Account information
                   </Typography>
                 </View>
+
                 <View style={styles.checkItem}>
                   <CheckCircle2 size={18} color={COLORS.success} strokeWidth={2.2} />
                   <Typography variant="bodyMedium" color={COLORS.primary} style={styles.checkText}>
                     Transaction history
                   </Typography>
                 </View>
+
+                <View style={styles.checkItem}>
+                  <CheckCircle2 size={18} color={COLORS.success} strokeWidth={2.2} />
+                  <Typography variant="bodyMedium" color={COLORS.primary} style={styles.checkText}>
+                    Balance information
+                  </Typography>
+                </View>
               </View>
 
               <View style={styles.consentDivider} />
 
-              {/* Date Range */}
+              {/* Data Period */}
               <View style={styles.consentSection}>
                 <Typography variant="caption" color={COLORS.textSecondary} style={styles.sectionHeading}>
-                  DATE RANGE
+                  DATA PERIOD
                 </Typography>
-                <View style={styles.dateRangeBox}>
+                <View style={styles.parameterBadgeBox}>
                   <Calendar size={18} color={COLORS.primary} strokeWidth={1.8} />
                   <Typography variant="bodySemiBold" color={COLORS.primary} style={{ marginLeft: 10 }}>
-                    01 Aug 2026 — 18 Sep 2026
+                    Last 6 months
                   </Typography>
                 </View>
               </View>
@@ -300,27 +343,30 @@ export default function AccountAggregatorFlow() {
                   <Typography variant="bodyBold" color={COLORS.primary}>
                     "Personal Financial Management"
                   </Typography>
-                  <Typography variant="secondary" color={COLORS.textSecondary} style={{ marginTop: 4 }}>
-                    To provide cash-flow analytics, subscription detection, and financial copilot intelligence.
+                  <Typography variant="secondary" color={COLORS.textSecondary} style={{ marginTop: 6 }}>
+                    ASSAY uses this information to analyze your financial health and provide personalized insights.
                   </Typography>
                 </View>
               </View>
             </View>
 
-            {/* Actions */}
-            <View style={styles.actionButtons}>
+            {/* CTAs */}
+            <View style={styles.actionGroup}>
               <Button
-                title="Approve & Continue"
+                title="Continue to Consent"
                 variant="primary"
                 size="lg"
-                onPress={() => setCurrentStep(3)}
+                onPress={() => {
+                  setSandboxSubStep('phone');
+                  setCurrentStep(3);
+                }}
                 style={styles.mainCta}
               />
               <Button
                 title="Cancel"
                 variant="secondary"
                 size="md"
-                onPress={() => router.back()}
+                onPress={() => setCurrentStep(1)}
                 style={styles.secondaryCta}
               />
             </View>
@@ -328,73 +374,181 @@ export default function AccountAggregatorFlow() {
         )}
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            SCREEN 3 — ACCOUNT SELECTION
+            SCREEN 3 — AA SANDBOX GATEWAY (External Mock UI)
             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {currentStep === 3 && (
           <View style={styles.stepContainer}>
-            <View style={styles.headerSection}>
-              <Typography variant="pageTitle" style={styles.pageTitle}>
-                Select accounts
-              </Typography>
-              <Typography variant="body" color={COLORS.textSecondary} style={styles.subtitle}>
-                Choose which sandbox accounts to link with your ASSAY profile.
-              </Typography>
+            {/* Visually separate sandbox frame */}
+            <View style={styles.sandboxFrame}>
+              <View style={styles.sandboxGatewayHeader}>
+                <View style={styles.sandboxHeaderLeft}>
+                  <Building2 size={16} color="#475569" />
+                  <Text style={styles.sandboxHeaderText}>RBI ACCOUNT AGGREGATOR GATEWAY</Text>
+                </View>
+                <View style={styles.sandboxBadgePill}>
+                  <Text style={styles.sandboxBadgeText}>SANDBOX</Text>
+                </View>
+              </View>
+
+              <View style={styles.sandboxContent}>
+                {/* Sub-step 1: Mobile Verification */}
+                {sandboxSubStep === 'phone' && (
+                  <View style={styles.sandboxStepInner}>
+                    <Typography variant="h3" color={COLORS.primary} style={styles.gatewayTitle}>
+                      Verify your mobile number
+                    </Typography>
+                    <Typography variant="secondary" color={COLORS.textSecondary} style={styles.gatewaySubtitle}>
+                      An OTP will be sent to the number registered with your financial institutions.
+                    </Typography>
+
+                    <View style={styles.phoneInputRow}>
+                      <View style={styles.countryCodeBox}>
+                        <Text style={styles.countryCodeText}>+91</Text>
+                      </View>
+                      <View style={styles.phoneDisplayBox}>
+                        <Smartphone size={16} color={COLORS.textSecondary} style={{ marginRight: 8 }} />
+                        <Text style={styles.phoneDisplayText}>98765 43210</Text>
+                      </View>
+                    </View>
+
+                    <Button
+                      title="Send OTP"
+                      variant="primary"
+                      size="md"
+                      onPress={() => setSandboxSubStep('otp')}
+                      style={{ marginTop: 16 }}
+                    />
+                  </View>
+                )}
+
+                {/* Sub-step 2: OTP Entry */}
+                {sandboxSubStep === 'otp' && (
+                  <View style={styles.sandboxStepInner}>
+                    <Typography variant="h3" color={COLORS.primary} style={styles.gatewayTitle}>
+                      Enter 6-digit OTP
+                    </Typography>
+                    <Typography variant="secondary" color={COLORS.textSecondary} style={styles.gatewaySubtitle}>
+                      Sent to +91 98765 43210 (Demo auto-filled)
+                    </Typography>
+
+                    <View style={styles.otpBoxesRow}>
+                      {['8', '4', '9', '2', '0', '1'].map((digit, idx) => (
+                        <View key={idx} style={styles.otpBox}>
+                          <Text style={styles.otpDigit}>{digit}</Text>
+                        </View>
+                      ))}
+                    </View>
+
+                    <Button
+                      title={isVerifyingOtp ? "Verifying Token..." : "Verify OTP & Discover Accounts"}
+                      variant="primary"
+                      size="md"
+                      loading={isVerifyingOtp}
+                      onPress={() => {
+                        setIsVerifyingOtp(true);
+                        setTimeout(() => {
+                          setIsVerifyingOtp(false);
+                          setSandboxSubStep('bank_select');
+                        }, 600);
+                      }}
+                      style={{ marginTop: 16 }}
+                    />
+                  </View>
+                )}
+
+                {/* Sub-step 3: Bank & Account Selection */}
+                {sandboxSubStep === 'bank_select' && (
+                  <View style={styles.sandboxStepInner}>
+                    <Typography variant="h3" color={COLORS.primary} style={styles.gatewayTitle}>
+                      Select Linked Bank Accounts
+                    </Typography>
+                    <Typography variant="secondary" color={COLORS.textSecondary} style={styles.gatewaySubtitle}>
+                      Discovered accounts associated with your mobile identity.
+                    </Typography>
+
+                    <View style={styles.bankCardsContainer}>
+                      {SANDBOX_ACCOUNTS.slice(0, 3).map((account) => (
+                        <BankCardItem
+                          key={account.id}
+                          account={account}
+                          isSelected={selectedAccountIds.includes(account.id)}
+                          onToggle={handleToggleAccount}
+                        />
+                      ))}
+                    </View>
+
+                    <Button
+                      title="Proceed with Selected Account"
+                      variant="primary"
+                      size="md"
+                      onPress={() => setSandboxSubStep('account_confirm')}
+                      style={{ marginTop: 10 }}
+                    />
+                  </View>
+                )}
+
+                {/* Sub-step 4: Final Consent Approval */}
+                {sandboxSubStep === 'account_confirm' && (
+                  <View style={styles.sandboxStepInner}>
+                    <Typography variant="h3" color={COLORS.primary} style={styles.gatewayTitle}>
+                      Confirm & Authorize Consent
+                    </Typography>
+                    <Typography variant="secondary" color={COLORS.textSecondary} style={styles.gatewaySubtitle}>
+                      You are granting read-only consent to ASSAY for the selected account(s).
+                    </Typography>
+
+                    <View style={styles.consentSummarySnippet}>
+                      <View style={styles.snippetRow}>
+                        <Text style={styles.snippetLabel}>FIU Entity:</Text>
+                        <Text style={styles.snippetVal}>ASSAY Financial</Text>
+                      </View>
+                      <View style={styles.snippetRow}>
+                        <Text style={styles.snippetLabel}>Accounts:</Text>
+                        <Text style={styles.snippetVal}>{selectedAccountsCount} selected</Text>
+                      </View>
+                      <View style={styles.snippetRow}>
+                        <Text style={styles.snippetLabel}>Data Types:</Text>
+                        <Text style={styles.snippetVal}>Profile, Balance, History</Text>
+                      </View>
+                      <View style={styles.snippetRow}>
+                        <Text style={styles.snippetLabel}>Validity:</Text>
+                        <Text style={styles.snippetVal}>1 Year (Revocable anytime)</Text>
+                      </View>
+                    </View>
+
+                    <Button
+                      title="Approve Consent & Return to ASSAY"
+                      variant="gold"
+                      size="lg"
+                      onPress={() => setCurrentStep(4)}
+                      style={{ marginTop: 14 }}
+                    />
+                  </View>
+                )}
+              </View>
             </View>
 
-            {/* Bank Cards List */}
-            <View style={styles.bankList}>
-              {SANDBOX_ACCOUNTS.map((account) => (
-                <BankCardItem
-                  key={account.id}
-                  account={account}
-                  isSelected={selectedAccountIds.includes(account.id)}
-                  onToggle={handleToggleAccount}
-                />
-              ))}
-            </View>
-
-            {/* Selection Summary Pill */}
-            <View style={styles.selectionSummary}>
+            {/* Disclaimers */}
+            <View style={styles.securityNotice}>
+              <Lock size={14} color={COLORS.textSecondary} />
               <Typography variant="caption" color={COLORS.textSecondary}>
-                Selected: <Typography variant="caption" color={COLORS.primary} style={{ fontFamily: FONTS.bodyBold }}>{selectedAccountsCount} of {SANDBOX_ACCOUNTS.length} accounts</Typography>
+                ASSAY does not collect or store actual bank passwords.
               </Typography>
-              <TouchableOpacity
-                onPress={() => {
-                  if (selectedAccountIds.length === SANDBOX_ACCOUNTS.length) {
-                    setSelectedAccountIds(['acc-hdfc-4821']);
-                  } else {
-                    setSelectedAccountIds(SANDBOX_ACCOUNTS.map((a) => a.id));
-                  }
-                }}
-              >
-                <Typography variant="caption" color={COLORS.gold} style={{ fontFamily: FONTS.bodySemiBold }}>
-                  {selectedAccountIds.length === SANDBOX_ACCOUNTS.length ? 'Reset Selection' : 'Select All'}
-                </Typography>
-              </TouchableOpacity>
             </View>
-
-            {/* CTA */}
-            <Button
-              title={`Connect Selected (${selectedAccountsCount} ${selectedAccountsCount === 1 ? 'Account' : 'Accounts'})`}
-              variant="primary"
-              size="lg"
-              onPress={() => setCurrentStep(4)}
-              style={styles.mainCta}
-            />
           </View>
         )}
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            SCREEN 4 — FETCHING
+            SCREEN 4 — PROGRESS PIPELINE
             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {currentStep === 4 && (
           <View style={styles.stepContainer}>
             <View style={styles.headerSection}>
               <Typography variant="pageTitle" style={styles.pageTitle}>
-                Importing financial data
+                Connecting your account...
               </Typography>
               <Typography variant="body" color={COLORS.textSecondary} style={styles.subtitle}>
-                Establishing encrypted connection with Account Aggregator...
+                Normalizing statement data and computing financial health indicators.
               </Typography>
             </View>
 
@@ -406,9 +560,9 @@ export default function AccountAggregatorFlow() {
             {/* Checklist Pipeline */}
             <View style={styles.fetchingCard}>
               <FetchingStepItem
-                label="Consent verified"
+                label="Consent approved"
                 status={fetchStage >= 1 ? 'completed' : 'active'}
-                detail="RBI Sandbox token #AA-2026-9812 validated."
+                detail="AA Consent Token #AA-2026-9812 validated."
               />
               <FetchingStepItem
                 label="Account connected"
@@ -416,14 +570,14 @@ export default function AccountAggregatorFlow() {
                 detail={`${selectedAccountsCount} bank entity handshake confirmed.`}
               />
               <FetchingStepItem
-                label="Fetching transactions..."
+                label="Fetching financial data"
                 status={fetchStage >= 3 ? 'completed' : fetchStage === 2 ? 'active' : 'pending'}
-                detail="Parsing normalized statements (01 Aug — 18 Sep 2026)."
+                detail="Receiving encrypted statement payload (Last 6 months)."
               />
               <FetchingStepItem
-                label="Analyzing financial activity..."
+                label="Analyzing transactions"
                 status={fetchStage >= 4 ? 'completed' : fetchStage === 3 ? 'active' : 'pending'}
-                detail="Classifying observed spend & recurring cash flows."
+                detail="Categorizing spend, cash flow trends, and recurring leaks."
                 isLast
               />
             </View>
@@ -438,7 +592,7 @@ export default function AccountAggregatorFlow() {
         )}
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            SCREEN 5 — SUCCESS
+            SCREEN 5 — DATA IMPORT SUCCESS
             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {currentStep === 5 && (
           <View style={styles.stepContainer}>
@@ -451,11 +605,11 @@ export default function AccountAggregatorFlow() {
                 Your financial picture is ready.
               </Typography>
               <Typography variant="body" color={COLORS.textSecondary} align="center" style={styles.subtitleCenter}>
-                ASSAY has synthesized your accounts into structured, explainable financial health indicators.
+                ASSAY analyzed your recent financial activity to build your first financial health overview.
               </Typography>
             </View>
 
-            {/* Metric Summary Card */}
+            {/* Metrics Summary Card */}
             <View style={styles.metricCard}>
               <View style={styles.metricRow}>
                 <View style={styles.metricItem}>
@@ -463,7 +617,7 @@ export default function AccountAggregatorFlow() {
                     {selectedAccountsCount}
                   </Typography>
                   <Typography variant="caption" color={COLORS.textSecondary} style={styles.metricLabel}>
-                    {selectedAccountsCount === 1 ? 'account connected' : 'accounts connected'}
+                    account connected
                   </Typography>
                 </View>
 
@@ -471,10 +625,10 @@ export default function AccountAggregatorFlow() {
 
                 <View style={styles.metricItem}>
                   <Typography variant="display" color={COLORS.primary} style={styles.metricNumber}>
-                    {totalImportedTransactions}
+                    342
                   </Typography>
                   <Typography variant="caption" color={COLORS.textSecondary} style={styles.metricLabel}>
-                    transactions imported
+                    transactions analyzed
                   </Typography>
                 </View>
 
@@ -485,13 +639,13 @@ export default function AccountAggregatorFlow() {
                     6
                   </Typography>
                   <Typography variant="caption" color={COLORS.textSecondary} style={styles.metricLabel}>
-                    months analyzed
+                    months of activity
                   </Typography>
                 </View>
               </View>
             </View>
 
-            {/* Observed vs Actionable Highlights */}
+            {/* Observed & Actionable Badges */}
             <View style={styles.highlightsContainer}>
               <View style={styles.highlightBadgeCard}>
                 <View style={styles.highlightHeader}>
@@ -503,41 +657,41 @@ export default function AccountAggregatorFlow() {
                   </Typography>
                 </View>
                 <Typography variant="secondary" color={COLORS.textSecondary}>
-                  Liquid bank balance synchronized across all linked accounts.
+                  Liquid bank balance and monthly income streams synchronized.
                 </Typography>
               </View>
 
               <View style={styles.highlightBadgeCard}>
                 <View style={styles.highlightHeader}>
                   <View style={styles.recommendedPill}>
-                    <Text style={styles.recommendedText}>RECOMMENDED</Text>
+                    <Text style={styles.recommendedText}>ACTIONABLE</Text>
                   </View>
                   <Typography variant="bodySemiBold" color={COLORS.primary}>
-                    3 Recurring Leaks Detected
+                    3 Spending Leaks Detected
                   </Typography>
                 </View>
                 <Typography variant="secondary" color={COLORS.textSecondary}>
-                  Assay identified ₹2,450/mo in unused subscriptions ready for review.
+                  ASSAY identified ₹1,450 in recurring micro-transactions ready for review.
                 </Typography>
               </View>
             </View>
 
             {/* CTA */}
             <Button
-              title="View Financial Health"
+              title="View My Financial Health"
               variant="primary"
               size="lg"
-              onPress={() => router.replace('/(tabs)')}
+              onPress={handleFinishOnboarding}
               style={styles.mainCta}
             />
           </View>
         )}
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            SCREEN TESTER TOOLBAR (Reviewer Helper)
+            SCREEN TESTER TOOLBAR (Sandbox Testing)
             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <View style={styles.demoSection}>
-          <Text style={styles.demoTitle}>JUMP TO STEP (SANDBOX TESTING)</Text>
+          <Text style={styles.demoTitle}>SANDBOX TESTING CONTROLS</Text>
           <View style={styles.demoPillsRow}>
             {[1, 2, 3, 4, 5].map((step) => (
               <TouchableOpacity
@@ -558,6 +712,16 @@ export default function AccountAggregatorFlow() {
                 </Text>
               </TouchableOpacity>
             ))}
+
+            <TouchableOpacity
+              style={[styles.demoPill, { borderColor: COLORS.error }]}
+              onPress={() => {
+                AAService.resetState();
+                setCurrentStep(1);
+              }}
+            >
+              <Text style={[styles.demoPillText, { color: COLORS.error }]}>Reset State</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -579,7 +743,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
     height: 44,
   },
   backButton: {
@@ -592,15 +756,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  closeButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: COLORS.surface,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    justifyContent: 'center',
-    alignItems: 'center',
+  skipButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  skipButtonText: {
+    fontFamily: FONTS.bodyMedium,
+    fontSize: 14,
+    color: COLORS.textSecondary,
   },
   stepPill: {
     paddingHorizontal: 12,
@@ -612,12 +775,12 @@ const styles = StyleSheet.create({
   },
   stepPillText: {
     fontFamily: FONTS.bodyMedium,
-    fontSize: 11,
+    fontSize: 10.5,
     color: COLORS.primary,
     letterSpacing: 0.8,
   },
   stepContainer: {
-    marginTop: 8,
+    marginTop: 4,
   },
   headerSection: {
     marginBottom: SPACING.xl,
@@ -643,24 +806,6 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     maxWidth: 320,
   },
-  explanationCard: {
-    backgroundColor: '#FCFAF5',
-    borderRadius: SIZES.radius,
-    borderWidth: 1,
-    borderColor: 'rgba(214, 169, 40, 0.3)',
-    padding: 18,
-    marginBottom: SPACING.xl,
-  },
-  explanationHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
-  },
-  explanationText: {
-    fontSize: 14.5,
-    lineHeight: 21,
-  },
   benefitsCard: {
     backgroundColor: COLORS.surface,
     borderRadius: SIZES.cardRadius,
@@ -669,23 +814,18 @@ const styles = StyleSheet.create({
     padding: SPACING.xl,
     marginBottom: SPACING.xl,
   },
-  benefitsTitle: {
-    letterSpacing: 1,
-    marginBottom: 16,
-    fontFamily: FONTS.bodySemiBold,
-  },
   benefitRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 14,
   },
-  benefitIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(17, 24, 39, 0.04)',
+  checkIconCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(214, 169, 40, 0.12)',
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: 'rgba(214, 169, 40, 0.25)',
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 2,
@@ -694,34 +834,45 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
   },
+  benefitTitle: {
+    fontSize: 15,
+    marginBottom: 2,
+  },
   benefitDivider: {
     height: 1,
     backgroundColor: COLORS.border,
     marginVertical: 14,
-    marginLeft: 50,
+    marginLeft: 42,
   },
-  privacyNoteRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
+  trustBox: {
+    backgroundColor: '#FCFAF5',
+    borderRadius: SIZES.radius,
+    borderWidth: 1,
+    borderColor: 'rgba(214, 169, 40, 0.3)',
+    padding: 16,
     marginBottom: SPACING.xl,
   },
-  privacyNoteText: {
-    fontFamily: FONTS.bodyMedium,
+  trustHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
+  trustText: {
+    fontSize: 13.5,
+    lineHeight: 20,
+  },
+  actionGroup: {
+    gap: 10,
+    marginTop: 4,
   },
   mainCta: {
     height: 52,
     borderRadius: SIZES.radius,
-    marginBottom: 10,
   },
   secondaryCta: {
     height: 48,
     borderRadius: SIZES.radius,
-  },
-  actionButtons: {
-    gap: 10,
-    marginTop: 8,
   },
   consentCard: {
     backgroundColor: COLORS.surface,
@@ -732,7 +883,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xl,
   },
   consentSection: {
-    paddingVertical: 4,
+    paddingVertical: 2,
   },
   sectionHeading: {
     letterSpacing: 0.8,
@@ -751,9 +902,9 @@ const styles = StyleSheet.create({
   consentDivider: {
     height: 1,
     backgroundColor: COLORS.border,
-    marginVertical: 16,
+    marginVertical: 14,
   },
-  dateRangeBox: {
+  parameterBadgeBox: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.background,
@@ -770,14 +921,151 @@ const styles = StyleSheet.create({
     borderRadius: SIZES.smallRadius,
     padding: 14,
   },
-  bankList: {
-    marginBottom: 8,
+  sandboxFrame: {
+    backgroundColor: '#0F172A',
+    borderRadius: SIZES.cardRadius,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#334155',
+    marginBottom: 16,
   },
-  selectionSummary: {
+  sandboxGatewayHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 4,
+    backgroundColor: '#1E293B',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#334155',
+  },
+  sandboxHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  sandboxHeaderText: {
+    color: '#94A3B8',
+    fontSize: 11,
+    fontFamily: FONTS.bodySemiBold,
+    letterSpacing: 0.5,
+  },
+  sandboxBadgePill: {
+    backgroundColor: '#F59E0B',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  sandboxBadgeText: {
+    color: '#000000',
+    fontSize: 9.5,
+    fontFamily: FONTS.bodyBold,
+    letterSpacing: 0.5,
+  },
+  sandboxContent: {
+    backgroundColor: COLORS.surface,
+    padding: 20,
+  },
+  sandboxStepInner: {
+    gap: 10,
+  },
+  gatewayTitle: {
+    fontSize: 20,
+    lineHeight: 26,
+  },
+  gatewaySubtitle: {
+    fontSize: 13.5,
+    lineHeight: 19,
+    marginBottom: 8,
+  },
+  phoneInputRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 6,
+  },
+  countryCodeBox: {
+    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: SIZES.smallRadius,
+    paddingHorizontal: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 48,
+  },
+  countryCodeText: {
+    fontFamily: FONTS.bodySemiBold,
+    fontSize: 15,
+    color: COLORS.primary,
+  },
+  phoneDisplayBox: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: SIZES.smallRadius,
+    paddingHorizontal: 14,
+    height: 48,
+  },
+  phoneDisplayText: {
+    fontFamily: FONTS.bodyMedium,
+    fontSize: 15,
+    color: COLORS.primary,
+  },
+  otpBoxesRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 12,
+  },
+  otpBox: {
+    width: 44,
+    height: 50,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: COLORS.primary,
+    backgroundColor: '#F8FAFC',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  otpDigit: {
+    fontSize: 20,
+    fontFamily: FONTS.bodyBold,
+    color: COLORS.primary,
+  },
+  bankCardsContainer: {
+    marginVertical: 6,
+  },
+  consentSummarySnippet: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: SIZES.smallRadius,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 14,
+    gap: 8,
+    marginTop: 4,
+  },
+  snippetRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  snippetLabel: {
+    fontFamily: FONTS.body,
+    fontSize: 13,
+    color: COLORS.textSecondary,
+  },
+  snippetVal: {
+    fontFamily: FONTS.bodySemiBold,
+    fontSize: 13,
+    color: COLORS.primary,
+  },
+  securityNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
     marginBottom: SPACING.xl,
   },
   progressContainer: {

@@ -5,9 +5,13 @@ import { useRouter } from 'expo-router';
 import { Typography } from '../../components/Typography';
 import { MerchantLogo } from '../../components/ui/MerchantLogo';
 import { COLORS, SIZES, FONTS } from '../../constants/theme';
+import { useAAState } from '../../services/aaState';
 import { 
   Camera, 
-  Image as ImageIcon
+  Image as ImageIcon,
+  Receipt,
+  FilePlus2,
+  ScanLine
 } from 'lucide-react-native';
 
 interface UploadItem {
@@ -29,10 +33,36 @@ const RECENT_UPLOADS: UploadItem[] = [
 
 export default function UploadScreen() {
   const router = useRouter();
+  const aaState = useAAState();
+
   const [uploads, setUploads] = useState<UploadItem[]>(RECENT_UPLOADS);
   const [isScanning, setIsScanning] = useState(false);
 
-  const handleScanAction = (source: 'camera' | 'gallery') => {
+  const handleScanAction = (source: 'camera' | 'gallery' | 'manual') => {
+    if (source === 'manual') {
+      Alert.alert(
+        'Manual Transaction',
+        'Add a custom expense or cash transaction.',
+        [
+          { text: 'Add ₹150 Chai & Snacks', onPress: () => {
+            const newItem: UploadItem = {
+              id: `tx-${Date.now()}`,
+              merchant: 'chaipoint',
+              title: 'Chai Point',
+              time: 'Just now',
+              amount: '₹150',
+              category: 'Food & Dining',
+              notes: 'Manual entry: Evening tea',
+              status: 'Processed'
+            };
+            setUploads(prev => [newItem, ...prev]);
+          }},
+          { text: 'Cancel', style: 'cancel' }
+        ]
+      );
+      return;
+    }
+
     setIsScanning(true);
     setTimeout(() => {
       setIsScanning(false);
@@ -64,13 +94,13 @@ export default function UploadScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Top Header - Left-aligned matching all other tabs */}
+      {/* Top Header */}
       <View style={styles.header}>
         <Typography variant="pageTitle" style={styles.headerTitle}>
-          Upload Receipt
+          Add financial activity
         </Typography>
         <Typography variant="secondary" color={COLORS.textSecondary} style={styles.headerSubtitle}>
-          Extract. Understand. Track.
+          Upload receipts, UPI screenshots, or manual entries.
         </Typography>
       </View>
 
@@ -86,21 +116,21 @@ export default function UploadScreen() {
         >
           <Camera color={COLORS.text} size={42} strokeWidth={1.6} style={styles.dropZoneIcon} />
           <Typography variant="cardHeading" style={styles.dropZoneTitle}>
-            {isScanning ? 'Analyzing Receipt...' : 'Tap to scan'}
+            {isScanning ? 'Analyzing Receipt / UPI...' : 'Tap to scan receipt'}
           </Typography>
           <Typography variant="secondary" color={COLORS.textSecondary}>
-            or upload from gallery
+            or upload UPI payment screenshot from gallery
           </Typography>
         </TouchableOpacity>
 
-        {/* Dual Actions: Gallery & Camera */}
+        {/* Triple Actions: Gallery, Camera, Manual */}
         <View style={styles.actionButtonsRow}>
           <TouchableOpacity 
             style={styles.actionButton}
             activeOpacity={0.75}
             onPress={() => handleScanAction('gallery')}
           >
-            <ImageIcon color={COLORS.text} size={20} style={{ marginRight: 8 }} />
+            <ImageIcon color={COLORS.text} size={18} style={{ marginRight: 6 }} />
             <Typography variant="bodyBold" color={COLORS.text} style={styles.actionButtonText}>
               Gallery
             </Typography>
@@ -111,34 +141,47 @@ export default function UploadScreen() {
             activeOpacity={0.75}
             onPress={() => handleScanAction('camera')}
           >
-            <Camera color={COLORS.text} size={20} style={{ marginRight: 8 }} />
+            <Camera color={COLORS.text} size={18} style={{ marginRight: 6 }} />
             <Typography variant="bodyBold" color={COLORS.text} style={styles.actionButtonText}>
               Camera
             </Typography>
           </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.actionButton}
+            activeOpacity={0.75}
+            onPress={() => handleScanAction('manual')}
+          >
+            <FilePlus2 color={COLORS.text} size={18} style={{ marginRight: 6 }} />
+            <Typography variant="bodyBold" color={COLORS.text} style={styles.actionButtonText}>
+              Manual
+            </Typography>
+          </TouchableOpacity>
         </View>
 
-        {/* Live Bank Sync via Account Aggregator */}
-        <TouchableOpacity
-          style={styles.aaBanner}
-          activeOpacity={0.8}
-          onPress={() => router.push('/connect')}
-        >
-          <View style={styles.aaBannerLeft}>
-            <Typography variant="caption" color={COLORS.gold} style={{ fontFamily: FONTS.bodyBold, letterSpacing: 0.8 }}>
-              RBI ACCOUNT AGGREGATOR
+        {/* Live Bank Sync banner is NEVER shown once AA onboarding is completed */}
+        {!aaState.aa_onboarding_completed && (
+          <TouchableOpacity
+            style={styles.aaBanner}
+            activeOpacity={0.8}
+            onPress={() => router.push('/connect')}
+          >
+            <View style={styles.aaBannerLeft}>
+              <Typography variant="caption" color={COLORS.gold} style={{ fontFamily: FONTS.bodyBold, letterSpacing: 0.8 }}>
+                RBI ACCOUNT AGGREGATOR
+              </Typography>
+              <Typography variant="bodyBold" color={COLORS.primary} style={{ marginTop: 2 }}>
+                Sync Live Bank Accounts
+              </Typography>
+              <Typography variant="secondary" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
+                Automate statements with consent-based data access.
+              </Typography>
+            </View>
+            <Typography variant="caption" color={COLORS.primary} style={{ fontFamily: FONTS.bodySemiBold }}>
+              Connect →
             </Typography>
-            <Typography variant="bodyBold" color={COLORS.primary} style={{ marginTop: 2 }}>
-              Sync Live Bank Accounts
-            </Typography>
-            <Typography variant="secondary" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
-              Automate statements with consent-based data access.
-            </Typography>
-          </View>
-          <Typography variant="caption" color={COLORS.primary} style={{ fontFamily: FONTS.bodySemiBold }}>
-            Connect →
-          </Typography>
-        </TouchableOpacity>
+          </TouchableOpacity>
+        )}
 
         {/* Recent Uploads Section */}
         <View style={styles.recentSectionHeader}>
@@ -228,23 +271,23 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
     borderColor: '#D4CEB8',
     borderRadius: 24,
-    paddingVertical: 44,
+    paddingVertical: 38,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   dropZoneIcon: {
-    marginBottom: 12,
+    marginBottom: 10,
   },
   dropZoneTitle: {
-    fontSize: 20,
+    fontSize: 19,
     marginBottom: 4,
     color: COLORS.text,
   },
   actionButtonsRow: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 28,
+    gap: 10,
+    marginBottom: 26,
   },
   actionButton: {
     flex: 1,
@@ -254,11 +297,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 18,
-    paddingVertical: 14,
+    borderRadius: 16,
+    paddingVertical: 12,
   },
   actionButtonText: {
-    fontSize: 15,
+    fontSize: 14,
   },
   recentSectionHeader: {
     flexDirection: 'row',

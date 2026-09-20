@@ -25,6 +25,7 @@ import {
   AuthError,
   AuthErrorType,
 } from '../../services/auth';
+import { AAService } from '../../services/aaState';
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -106,8 +107,13 @@ export default function SignUpScreen() {
           setGeneralError(result.error);
         }
       } else if (result.user) {
-        // Success: Navigate to Account Aggregator connection flow
-        router.replace('/connect');
+        // Check if user has already completed AA onboarding
+        const state = AAService.getState();
+        if (state.aa_onboarding_completed) {
+          router.replace('/(tabs)');
+        } else {
+          router.replace('/connect');
+        }
       }
     } catch (err) {
       setGeneralError({

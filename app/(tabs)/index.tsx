@@ -1,27 +1,36 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, ScrollView, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Typography } from '../../components/Typography';
 import { Card } from '../../components/Card';
 import { ScreenHeader } from '../../components/ui/ScreenHeader';
 import { TransactionRow } from '../../components/ui/TransactionRow';
-import { COLORS, SIZES, SPACING } from '../../constants/theme';
+import { COLORS, SIZES, SPACING, FONTS } from '../../constants/theme';
+import { useAAState } from '../../services/aaState';
 import {
   ScanLine,
   Image as ImageIcon,
   Users,
   PieChart,
   TrendingUp,
-  ArrowUpRight
+  ArrowUpRight,
+  ShieldCheck,
+  Building2,
+  Sparkles,
+  Calendar,
+  AlertCircle,
+  TrendingDown,
+  ArrowRight,
+  Layers,
 } from 'lucide-react-native';
 
 export default function Dashboard() {
   const router = useRouter();
+  const aaState = useAAState();
   const [hasUnreadNotification, setHasUnreadNotification] = React.useState(true);
 
   const handleNotificationPress = () => {
-    // Mark as read, canceling redirection to Copilot (/ai)
     setHasUnreadNotification(false);
   };
 
@@ -40,31 +49,91 @@ export default function Dashboard() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Monthly Spending Hero Card */}
+        {/* Subtle limited insights banner if user chose Set Up Later or disconnected */}
+        {!aaState.aa_connected && (
+          <View style={styles.limitedBanner}>
+            <View style={styles.limitedBannerLeft}>
+              <View style={styles.limitedIconWrap}>
+                <AlertCircle size={18} color="#D97706" />
+              </View>
+              <View style={styles.limitedTextWrap}>
+                <Typography variant="bodySemiBold" color={COLORS.primary} style={{ fontSize: 13.5 }}>
+                  Financial insights are limited
+                </Typography>
+                <Typography variant="caption" color={COLORS.textSecondary}>
+                  Connect your bank account to automate cash-flow analysis.
+                </Typography>
+              </View>
+            </View>
+            <TouchableOpacity
+              style={styles.connectPill}
+              onPress={() => router.push('/connect')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.connectPillText}>Connect</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            HERO CARD: CURRENT BALANCE & SPENDING
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <Card variant="hero" style={styles.heroCard}>
-          <Typography variant="secondary" color={COLORS.textSecondary} style={styles.heroLabel}>
-            Total spent this month
-          </Typography>
+          <View style={styles.heroTopRow}>
+            <Typography variant="secondary" color={COLORS.textSecondary} style={styles.heroLabel}>
+              {aaState.aa_connected ? 'Available Liquid Balance' : 'Total spent this month'}
+            </Typography>
+
+            {aaState.aa_connected && (
+              <View style={styles.bankStatusPill}>
+                <View style={styles.statusDot} />
+                <Text style={styles.bankStatusText}>
+                  {aaState.connected_accounts[0]?.bankName || 'HDFC Bank'} • Synced
+                </Text>
+              </View>
+            )}
+          </View>
 
           <View style={styles.amountRow}>
             <Typography variant="h1" color={COLORS.white} style={styles.heroAmount}>
-              ₹12,450
+              {aaState.aa_connected ? '₹1,66,930' : '₹12,450'}
             </Typography>
             <View style={styles.trendBadge}>
               <TrendingUp color={COLORS.success} size={14} strokeWidth={2} />
               <Typography variant="caption" color={COLORS.success} style={styles.trendText}>
-                +8%
+                +8.4%
               </Typography>
             </View>
           </View>
 
-          <View style={styles.heroBottomRow}>
-            <Typography variant="caption" color={COLORS.textSecondary}>
-              Most spent category
-            </Typography>
-            <Typography variant="bodyMedium" color={COLORS.gold}>
-              Food & Dining
-            </Typography>
+          {/* Key Financial Health Ratios (Payoff) */}
+          <View style={styles.heroMetricsGrid}>
+            <View style={styles.heroMetricCol}>
+              <Typography variant="caption" color={COLORS.textSecondary}>
+                Monthly Income
+              </Typography>
+              <Typography variant="bodyBold" color={COLORS.white} style={{ marginTop: 2 }}>
+                ₹85,000
+              </Typography>
+            </View>
+
+            <View style={styles.heroMetricCol}>
+              <Typography variant="caption" color={COLORS.textSecondary}>
+                Monthly Spending
+              </Typography>
+              <Typography variant="bodyBold" color={COLORS.white} style={{ marginTop: 2 }}>
+                ₹32,450
+              </Typography>
+            </View>
+
+            <View style={styles.heroMetricCol}>
+              <Typography variant="caption" color={COLORS.textSecondary}>
+                Savings Rate
+              </Typography>
+              <Typography variant="bodyBold" color={COLORS.gold} style={{ marginTop: 2 }}>
+                61.8%
+              </Typography>
+            </View>
           </View>
         </Card>
 
@@ -92,10 +161,76 @@ export default function Dashboard() {
           />
         </View>
 
-        {/* Spending Breakdown */}
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            FINANCIAL COPILOT INSIGHT
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <Card style={styles.insightCard}>
+          <View style={styles.insightHeader}>
+            <View style={styles.insightTag}>
+              <Sparkles size={13} color={COLORS.gold} />
+              <Text style={styles.insightTagText}>ASSAY CLARITY</Text>
+            </View>
+            <Typography variant="caption" color={COLORS.textSecondary}>
+              Automated Analysis
+            </Typography>
+          </View>
+
+          <Typography variant="bodyBold" color={COLORS.primary} style={styles.insightHeadline}>
+            {aaState.aa_connected
+              ? "Positive Cash Flow Trajectory"
+              : "Basic spend tracking active"}
+          </Typography>
+          <Typography variant="secondary" color={COLORS.textSecondary} style={styles.insightDetail}>
+            {aaState.aa_connected
+              ? "Your liquid reserves comfortably cover projected month-end commitments of ₹14,200. ₹52,550 surplus is eligible for compounding."
+              : "Upload recent receipts or link your account via Settings to unlock full cash flow forecasting."}
+          </Typography>
+        </Card>
+
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            UPCOMING OBLIGATIONS & CASH FLOW
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {aaState.aa_connected && (
+          <Card style={styles.sectionCard}>
+            <View style={styles.obligationHeader}>
+              <Typography variant="h3">Upcoming Obligations</Typography>
+              <Typography variant="caption" color={COLORS.textSecondary}>Next 14 Days</Typography>
+            </View>
+
+            <View style={styles.obligationList}>
+              <View style={styles.obligationRow}>
+                <View style={styles.obligationLeft}>
+                  <Calendar size={16} color={COLORS.primary} />
+                  <View>
+                    <Typography variant="bodyMedium">Apartment Rent</Typography>
+                    <Typography variant="caption" color={COLORS.textSecondary}>Due 25 Sep • Auto-debit</Typography>
+                  </View>
+                </View>
+                <Typography variant="bodyBold" color={COLORS.primary}>₹12,000</Typography>
+              </View>
+
+              <View style={styles.obligationDivider} />
+
+              <View style={styles.obligationRow}>
+                <View style={styles.obligationLeft}>
+                  <Calendar size={16} color={COLORS.primary} />
+                  <View>
+                    <Typography variant="bodyMedium">Broadband & Utilities</Typography>
+                    <Typography variant="caption" color={COLORS.textSecondary}>Due 28 Sep • AirFiber</Typography>
+                  </View>
+                </View>
+                <Typography variant="bodyBold" color={COLORS.primary}>₹2,200</Typography>
+              </View>
+            </View>
+          </Card>
+        )}
+
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            SPENDING BREAKDOWN
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <Card style={styles.sectionCard}>
           <Typography variant="h3" style={styles.sectionTitle}>
-            Spending
+            Top Spending Categories
           </Typography>
 
           <View style={styles.breakdownRow}>
@@ -114,16 +249,18 @@ export default function Dashboard() {
             </View>
 
             <View style={styles.breakdownList}>
-              <BreakdownItem color={COLORS.gold} label="Food & Dining" amount="₹4,200" percent="34%" />
-              <BreakdownItem color={COLORS.primary} label="Shopping" amount="₹3,100" percent="25%" />
-              <BreakdownItem color={COLORS.success} label="Transport" amount="₹2,050" percent="16%" />
-              <BreakdownItem color={COLORS.warning} label="Entertainment" amount="₹1,800" percent="14%" />
-              <BreakdownItem color={COLORS.textSecondary} label="Others" amount="₹1,300" percent="11%" />
+              <BreakdownItem color={COLORS.gold} label="Food & Dining" amount="₹11,400" percent="35%" />
+              <BreakdownItem color={COLORS.primary} label="Shopping" amount="₹8,200" percent="25%" />
+              <BreakdownItem color={COLORS.success} label="Transport" amount="₹5,150" percent="16%" />
+              <BreakdownItem color={COLORS.warning} label="Subscriptions" amount="₹4,400" percent="14%" />
+              <BreakdownItem color={COLORS.textSecondary} label="Others" amount="₹3,300" percent="10%" />
             </View>
           </View>
         </Card>
 
-        {/* Money Leaks */}
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            MONEY LEAKS
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <Card style={styles.sectionCard}>
           <View style={styles.leakHeader}>
             <Typography variant="h3">Money Leaks</Typography>
@@ -148,9 +285,11 @@ export default function Dashboard() {
           </View>
         </Card>
 
-        {/* Recent Transactions */}
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            RECENT TRANSACTIONS
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <View style={styles.transactionsHeader}>
-          <Typography variant="h3">Recent</Typography>
+          <Typography variant="h3">Recent Transactions</Typography>
           <TouchableOpacity
             onPress={() => router.push('/transactions')}
             activeOpacity={0.7}
@@ -268,16 +407,84 @@ const styles = StyleSheet.create({
     paddingHorizontal: SIZES.padding,
     paddingTop: 8,
   },
+  limitedBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    borderRadius: SIZES.radius,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 16,
+  },
+  limitedBannerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+    paddingRight: 10,
+  },
+  limitedIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(217, 119, 6, 0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  limitedTextWrap: {
+    flex: 1,
+    gap: 1,
+  },
+  connectPill: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  connectPillText: {
+    color: COLORS.white,
+    fontFamily: FONTS.bodySemiBold,
+    fontSize: 12,
+  },
   heroCard: {
     marginBottom: SPACING.xl,
   },
-  heroLabel: {
+  heroTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 8,
+  },
+  heroLabel: {
+    fontSize: 13,
+  },
+  bankStatusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#34D399',
+  },
+  bankStatusText: {
+    color: '#D1D5DB',
+    fontSize: 11,
+    fontFamily: FONTS.bodyMedium,
   },
   amountRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 18,
   },
   heroAmount: {
     fontFamily: 'Inter_700Bold',
@@ -298,13 +505,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  heroBottomRow: {
+  heroMetricsGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    paddingTop: 16,
+    borderTopColor: 'rgba(255, 255, 255, 0.12)',
+    paddingTop: 14,
+  },
+  heroMetricCol: {
+    gap: 2,
   },
   quickActions: {
     flexDirection: 'row',
@@ -330,11 +539,68 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     fontSize: 12,
   },
+  insightCard: {
+    backgroundColor: '#FCFAF5',
+    borderWidth: 1,
+    borderColor: 'rgba(214, 169, 40, 0.3)',
+    borderRadius: SIZES.cardRadius,
+    padding: 16,
+    marginBottom: SPACING.xl,
+  },
+  insightHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  insightTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  insightTagText: {
+    fontFamily: FONTS.bodyBold,
+    fontSize: 10,
+    color: '#927014',
+    letterSpacing: 0.8,
+  },
+  insightHeadline: {
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  insightDetail: {
+    fontSize: 13.5,
+    lineHeight: 19,
+  },
   sectionCard: {
     marginBottom: SPACING.xl,
   },
   sectionTitle: {
     marginBottom: SPACING.base,
+  },
+  obligationHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.base,
+  },
+  obligationList: {
+    gap: 10,
+  },
+  obligationRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  obligationLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  obligationDivider: {
+    height: 1,
+    backgroundColor: COLORS.border,
+    marginVertical: 4,
   },
   breakdownRow: {
     flexDirection: 'row',

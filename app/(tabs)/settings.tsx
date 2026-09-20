@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { Typography } from '../../components/Typography';
 import { ProfileAvatar } from '../../components/profile/ProfileAvatar';
 import { COLORS } from '../../constants/theme';
+import { useAAState } from '../../services/aaState';
 import { 
   LayoutGrid, 
   CreditCard, 
@@ -57,6 +58,7 @@ function SettingRow({ icon, label, value, onPress, showDivider = false }: Settin
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const aaState = useAAState();
 
   const handleRowClick = (title: string) => {
     Alert.alert(title, `${title} management is connected to your Assay profile.`);
@@ -107,10 +109,10 @@ export default function SettingsScreen() {
           />
           <SettingRow
             icon={<CreditCard color={COLORS.text} size={20} strokeWidth={1.8} />}
-            label="Payment Methods & AA Consents"
-            value="Sandbox Active"
+            label="Connected Accounts"
+            value={aaState.aa_connected ? "1 Connected" : "Not Connected"}
             showDivider
-            onPress={() => router.push('/connect')}
+            onPress={() => router.push('/settings/connected-accounts')}
           />
           <SettingRow
             icon={<Bell color={COLORS.text} size={20} strokeWidth={1.8} />}

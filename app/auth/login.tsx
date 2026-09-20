@@ -18,6 +18,7 @@ import { AuthInput } from '../../components/auth/AuthInput';
 import { AuthErrorBanner } from '../../components/auth/AuthErrorBanner';
 import { COLORS, SIZES, SPACING, FONTS } from '../../constants/theme';
 import { loginUser, validateEmail, AuthError, AuthErrorType } from '../../services/auth';
+import { AAService } from '../../services/aaState';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -68,8 +69,13 @@ export default function LoginScreen() {
           setGeneralError(result.error);
         }
       } else if (result.user) {
-        // Success: Navigate to the main financial copilot tabs
-        router.replace('/(tabs)');
+        // If returning user has completed onboarding, go directly to Dashboard
+        const state = AAService.getState();
+        if (state.aa_onboarding_completed) {
+          router.replace('/(tabs)');
+        } else {
+          router.replace('/connect');
+        }
       }
     } catch (err) {
       setGeneralError({

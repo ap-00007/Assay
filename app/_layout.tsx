@@ -78,6 +78,7 @@ export default function RootLayout() {
       <Stack.Screen name="copilot/affordability" options={{ presentation: 'card' }} />
       <Stack.Screen name="simulator/index" options={{ presentation: 'card' }} />
       <Stack.Screen name="settings/profile" options={{ presentation: 'card' }} />
+      <Stack.Screen name="settings/connected-accounts" options={{ presentation: 'card' }} />
       <Stack.Screen name="settings/categories" options={{ presentation: 'card' }} />
       <Stack.Screen name="settings/notifications" options={{ presentation: 'card' }} />
       <Stack.Screen name="settings/privacy" options={{ presentation: 'card' }} />
