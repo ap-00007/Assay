@@ -25,7 +25,7 @@ import Svg, {
 import { Typography } from '../../components/Typography';
 import { Card } from '../../components/Card';
 import { ScreenHeader } from '../../components/ui/ScreenHeader';
-import { FloatingCopilotButton } from '../../components/ui/FloatingCopilotButton';
+import { MerchantLogo } from '../../components/ui/MerchantLogo';
 import { COLORS, SIZES, SPACING } from '../../constants/theme';
 import {
   TrendingUp,
@@ -659,11 +659,7 @@ export default function InsightsScreen() {
             onPress={() => router.push('/debt')}
             activeOpacity={0.75}
           >
-            <View style={[styles.obligationIcon, { backgroundColor: '#FEE2E2' }]}>
-              <Typography variant="bodyBold" color="#DC2626" style={{ fontSize: 13 }}>
-                AX
-              </Typography>
-            </View>
+            <MerchantLogo name="axis" size={42} style={{ marginRight: 12 }} />
             <View style={styles.obligationDetails}>
               <Typography variant="bodyBold" style={{ fontSize: 15 }}>
                 Axis Car Loan EMI
@@ -813,9 +809,6 @@ export default function InsightsScreen() {
 
         <View style={{ height: 110 }} />
       </ScrollView>
-
-      {/* Floating Copilot Button (Compact 44x44, Robot icon only, Expandable) */}
-      <FloatingCopilotButton bottomOffset={82} />
     </SafeAreaView>
   );
 }

@@ -15,6 +15,8 @@ import {
   Camera, 
   Lock 
 } from 'lucide-react-native';
+import { MerchantLogo } from '../../components/ui/MerchantLogo';
+import { ProfileAvatar } from '../../components/profile/ProfileAvatar';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -57,14 +59,7 @@ export default function ProfileScreen() {
       >
         {/* Avatar Card */}
         <View style={styles.avatarSection}>
-          <View style={styles.avatarWrapper}>
-            <View style={styles.avatarPlaceholder}>
-              <User color="#475569" size={48} />
-            </View>
-            <TouchableOpacity style={styles.cameraPill} activeOpacity={0.8}>
-              <Camera color="#FFFFFF" size={14} />
-            </TouchableOpacity>
-          </View>
+          <ProfileAvatar size={84} seed={name || 'Ashish'} editable />
           <Typography variant="h3" style={{ marginTop: 12 }}>
             {name}
           </Typography>
@@ -146,10 +141,8 @@ export default function ProfileScreen() {
         </Typography>
 
         <View style={styles.bankCard}>
-          <View style={styles.bankIconWrapper}>
-            <Building2 color="#1E40AF" size={24} />
-          </View>
-          <View style={{ flex: 1 }}>
+          <MerchantLogo name="hdfc" size={42} />
+          <View style={{ flex: 1, marginLeft: 12 }}>
             <Typography variant="bodyBold">HDFC Bank Salary Account</Typography>
             <Typography variant="caption" color={COLORS.textSecondary} style={{ marginTop: 2 }}>
               Account Number: •••• 4291 • IFSC: HDFC0001234

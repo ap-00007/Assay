@@ -19,6 +19,25 @@ import {
   ExternalLink
 } from 'lucide-react-native';
 
+const KNOWN_TRANSACTIONS: Record<string, { name: string; merchantKey: string; amount: string; time: string; method: string; category: string; notes: string }> = {
+  '1': { name: 'Starbucks', merchantKey: 'starbucks', amount: '₹340', time: 'Today, 10:42 AM', method: 'UPI', category: 'Food & Dining', notes: 'Morning coffee ☕' },
+  '2': { name: 'Salary', merchantKey: 'hdfc', amount: '+₹85,000', time: 'Today, 09:00 AM', method: 'Bank', category: 'Income', notes: 'Monthly payroll deposit' },
+  '3': { name: 'Uber', merchantKey: 'uber', amount: '₹250', time: 'Yesterday, 6:15 PM', method: 'Card', category: 'Transport', notes: 'Evening commute to HQ' },
+  '5': { name: 'Amazon', merchantKey: 'amazon', amount: '₹1,200', time: '10 Jul, 2:30 PM', method: 'Card', category: 'Shopping', notes: 'Office desk supplies' },
+  'tx-1': { name: 'Starbucks', merchantKey: 'starbucks', amount: '₹250', time: 'Today, 9:42 AM', method: 'UPI', category: 'Food & Dining', notes: 'Morning coffee ☕' },
+  'tx-2': { name: 'Blinkit', merchantKey: 'blinkit', amount: '₹412', time: 'Today, 8:50 AM', method: 'UPI', category: 'Groceries', notes: 'Instant pantry restock' },
+  'tx-3': { name: 'Uber', merchantKey: 'uber', amount: '₹120', time: 'Today, 8:20 AM', method: 'UPI', category: 'Transport', notes: 'Morning commute to HQ' },
+  'tx-4': { name: 'Swiggy', merchantKey: 'swiggy', amount: '₹620', time: 'Yesterday, 8:45 PM', method: 'Card', category: 'Food & Dining', notes: 'Dinner order' },
+  'tx-5': { name: 'Amazon', merchantKey: 'amazon', amount: '₹899', time: 'Yesterday, 6:10 PM', method: 'Card', category: 'Shopping', notes: 'Office desk accessories' },
+  'tx-6': { name: 'BookMyShow', merchantKey: 'bookmyshow', amount: '₹850', time: '14 Jul, 7:30 PM', method: 'Card', category: 'Entertainment', notes: 'Weekend movie tickets' },
+  'tx-7': { name: 'Blinkit', merchantKey: 'blinkit', amount: '₹340', time: '12 Jul, 11:15 AM', method: 'UPI', category: 'Groceries', notes: 'Groceries & snacks' },
+  'tx-8': { name: 'Zomato', merchantKey: 'zomato', amount: '₹560', time: '11 Jul, 9:00 PM', method: 'UPI', category: 'Food & Dining', notes: 'Late dinner' },
+  'tx-9': { name: 'Netflix', merchantKey: 'netflix', amount: '₹649', time: '10 Jul, 1:15 PM', method: 'Card', category: 'Entertainment', notes: 'Monthly 4K plan' },
+  'tx-10': { name: 'Spotify', merchantKey: 'spotify', amount: '₹119', time: '09 Jul, 10:00 AM', method: 'Card', category: 'Entertainment', notes: 'Premium individual' },
+  'tx-11': { name: 'Delhi Metro', merchantKey: 'metro', amount: '₹60', time: '08 Jul, 9:15 AM', method: 'Card', category: 'Transport', notes: 'Smart Card recharge' },
+  'tx-12': { name: 'Chai Point', merchantKey: 'tea', amount: '₹180', time: '07 Jul, 4:30 PM', method: 'UPI', category: 'Food & Dining', notes: 'Masala chai & samosa' },
+};
+
 export default function TransactionDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
@@ -32,13 +51,15 @@ export default function TransactionDetailScreen() {
     notes?: string;
   }>();
 
-  const name = params.name || 'Starbucks';
-  const merchantKey = params.merchantKey || 'starbucks';
-  const amount = params.amount || '₹250';
-  const time = params.time ? `${params.time}` : 'Today, 9:42 AM';
-  const method = params.method || 'UPI';
-  const category = params.category || 'Food & Dining';
-  const initialNotes = params.notes || (name.toLowerCase().includes('starbucks') ? 'Morning coffee ☕' : 'Verified via Assay');
+  const fallback = (params.id && KNOWN_TRANSACTIONS[params.id]) || KNOWN_TRANSACTIONS['1'];
+
+  const name = params.name || fallback.name;
+  const merchantKey = params.merchantKey || fallback.merchantKey;
+  const amount = params.amount || fallback.amount;
+  const time = params.time ? `${params.time}` : fallback.time;
+  const method = params.method || fallback.method;
+  const category = params.category || fallback.category;
+  const initialNotes = params.notes || fallback.notes;
 
   const [copied, setCopied] = useState(false);
   const [notes, setNotes] = useState(initialNotes);
