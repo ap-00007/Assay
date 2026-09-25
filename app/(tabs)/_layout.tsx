@@ -1,13 +1,13 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { Platform } from 'react-native';
+import { Platform, View } from 'react-native';
 import { COLORS, FONTS, SIZES } from '../../constants/theme';
-import { 
-  LayoutDashboard, 
-  Upload, 
-  ListOrdered, 
-  LineChart, 
-  Settings 
+import {
+  LayoutDashboard,
+  Receipt,
+  Bot,
+  Target,
+  MoreHorizontal,
 } from 'lucide-react-native';
 
 export default function TabLayout() {
@@ -31,30 +31,21 @@ export default function TabLayout() {
           bottom: 0,
         },
         tabBarActiveTintColor: COLORS.gold,
-        tabBarInactiveTintColor: COLORS.textSecondary,
+        tabBarInactiveTintColor: 'rgba(255,255,255,0.4)',
         tabBarShowLabel: true,
         tabBarLabelStyle: {
           fontFamily: FONTS.bodyMedium,
           fontSize: 11,
-          marginTop: 4,
+          marginTop: 2,
         },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Dashboard',
+          title: 'Home',
           tabBarIcon: ({ color, focused }) => (
             <LayoutDashboard color={color} size={22} strokeWidth={focused ? 2.2 : 1.8} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="upload"
-        options={{
-          title: 'Upload',
-          tabBarIcon: ({ color, focused }) => (
-            <Upload color={color} size={22} strokeWidth={focused ? 2.2 : 1.8} />
           ),
         }}
       />
@@ -63,28 +54,63 @@ export default function TabLayout() {
         options={{
           title: 'Transactions',
           tabBarIcon: ({ color, focused }) => (
-            <ListOrdered color={color} size={22} strokeWidth={focused ? 2.2 : 1.8} />
+            <Receipt color={color} size={22} strokeWidth={focused ? 2.2 : 1.8} />
           ),
         }}
       />
       <Tabs.Screen
-        name="insights"
+        name="copilot"
         options={{
-          title: 'Insights',
+          title: 'Copilot',
           tabBarIcon: ({ color, focused }) => (
-            <LineChart color={color} size={22} strokeWidth={focused ? 2.2 : 1.8} />
+            <View
+              style={{
+                width: 46,
+                height: 46,
+                borderRadius: 15,
+                backgroundColor: focused ? COLORS.gold : 'rgba(214,169,40,0.2)',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 2,
+                borderWidth: focused ? 0 : 1.5,
+                borderColor: 'rgba(214,169,40,0.4)',
+              }}
+            >
+              <Bot color={focused ? COLORS.primary : COLORS.gold} size={22} strokeWidth={2} />
+            </View>
+          ),
+          tabBarActiveTintColor: COLORS.gold,
+          tabBarLabelStyle: {
+            fontFamily: FONTS.bodyMedium,
+            fontSize: 11,
+            marginTop: 2,
+            color: COLORS.gold,
+          },
+        }}
+      />
+      <Tabs.Screen
+        name="goals"
+        options={{
+          title: 'Goals',
+          tabBarIcon: ({ color, focused }) => (
+            <Target color={color} size={22} strokeWidth={focused ? 2.2 : 1.8} />
           ),
         }}
       />
       <Tabs.Screen
-        name="settings"
+        name="more"
         options={{
-          title: 'Settings',
+          title: 'More',
           tabBarIcon: ({ color, focused }) => (
-            <Settings color={color} size={22} strokeWidth={focused ? 2.2 : 1.8} />
+            <MoreHorizontal color={color} size={22} strokeWidth={focused ? 2.2 : 1.8} />
           ),
         }}
       />
+
+      {/* Legacy screens — hidden from tab bar */}
+      <Tabs.Screen name="insights" options={{ href: null }} />
+      <Tabs.Screen name="settings" options={{ href: null }} />
+      <Tabs.Screen name="upload" options={{ href: null }} />
     </Tabs>
   );
 }
