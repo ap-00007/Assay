@@ -1,45 +1,14 @@
 {
-  "name": "assay",
+  "name": "assay-monorepo",
   "version": "1.0.0",
-  "main": "expo-router/entry",
+  "private": true,
+  "description": "Assay - Financial Health Copilot (Frontend & Backend)",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
-  },
-  "dependencies": {
-    "@expo-google-fonts/antic-didone": "^0.2.3",
-    "@expo-google-fonts/dm-sans": "^0.4.2",
-    "@expo-google-fonts/inter": "^0.2.3",
-    "@expo/metro-runtime": "~57.0.15",
-    "@react-native-community/slider": "5.2.0",
-    "@tanstack/react-query": "^5.101.2",
-    "axios": "^1.18.1",
-    "expo": "~57.0.23",
-    "expo-blur": "~57.0.3",
-    "expo-constants": "~57.0.17",
-    "expo-font": "~57.0.3",
-    "expo-image-picker": "~57.0.19",
-    "expo-linking": "~57.0.10",
-    "expo-router": "~57.0.21",
-    "expo-splash-screen": "~57.0.9",
-    "expo-status-bar": "~57.0.1",
-    "lucide-react-native": "^1.24.0",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "react-native": "0.86.3",
-    "react-native-gesture-handler": "~2.32.0",
-    "react-native-reanimated": "4.5.1",
-    "react-native-safe-area-context": "~5.7.0",
-    "react-native-screens": "~4.26.0",
-    "react-native-svg": "15.15.4",
-    "react-native-web": "^0.21.2",
-    "react-native-worklets": "0.10.1"
-  },
-  "devDependencies": {
-    "@types/react": "~19.2.4",
-    "typescript": "~6.0.3"
-  },
-  "private": true
+    "start": "npm --prefix frontend start",
+    "dev:frontend": "npm --prefix frontend start",
+    "dev:backend": "cd backend && uvicorn app.main:app --reload --port 8000",
+    "ios": "npm --prefix frontend run ios",
+    "android": "npm --prefix frontend run android",
+    "web": "npm --prefix frontend run web"
+  }
 }

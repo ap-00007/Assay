@@ -92,51 +92,80 @@ Production Account Aggregator access is intentionally not a prerequisite for the
 
 ### Prerequisites
 
-- Node.js
-- npm
+- Node.js (v18+) & npm
+- Python (v3.10+)
 - Expo-compatible development environment
 - iOS Simulator, Android emulator, or Expo Go for device testing
 
-### Install dependencies
+### Monorepo Scripts (Root)
 
 ```bash
-npm install
-```
+# Start frontend mobile app
+npm run dev:frontend
 
-Expo native modules should be installed or repaired with `npx expo install` so their versions stay compatible with the Expo SDK.
+# Start backend FastAPI server
+npm run dev:backend
 
-### Start the development server
-
-```bash
-npm start
-```
-
-Then choose a target from the Expo CLI, or use one of the scripts below:
-
-```bash
+# Platform shortcuts
 npm run ios
 npm run android
 npm run web
 ```
 
-### Verify the iOS bundle
+### Frontend (Expo Mobile App)
 
 ```bash
-npx expo export --platform ios --output-dir .expo/ios-export-check
+cd frontend
+npm install
+npm start
 ```
+
+Expo native modules should be installed or repaired with `npx expo install` so their versions stay compatible with the Expo SDK.
+
+### Backend (FastAPI Service)
+
+```bash
+cd backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+uvicorn app.main:app --reload --port 8000
+```
+
+- Swagger API Docs: `http://localhost:8000/api/v1/docs`
+- Health Check: `http://localhost:8000/health`
 
 ## Project Structure
 
 ```text
-app/                 Expo Router screens and route layouts
-components/          Reusable UI and feature components
-constants/           Theme, color, typography, and spacing tokens
-hooks/               Reusable React hooks
-services/            API, authentication, transaction, and upload clients
-types/               Shared TypeScript domain types
-utils/               Currency, date, parsing, and other helpers
-assets/              Fonts and image assets
-docs/                Product, architecture, API, design, and roadmap docs
+assay/
+├── frontend/             # Expo React Native mobile application
+│   ├── app/              # Expo Router screens and route layouts
+│   ├── components/       # Reusable UI, auth, aa, and feature components
+│   ├── constants/        # Theme, color, typography, and spacing tokens
+│   ├── hooks/            # Reusable React hooks
+│   ├── services/         # API, authentication, and state services
+│   ├── types/            # Shared TypeScript domain types
+│   ├── utils/            # Currency, date, and parsing helpers
+│   ├── assets/           # Fonts, avatars, and image assets
+│   └── package.json      # Frontend package configuration
+│
+├── backend/              # FastAPI Python backend service
+│   ├── app/
+│   │   ├── main.py       # FastAPI application entrypoint
+│   │   ├── core/         # Config, security (JWT), and database setup
+│   │   ├── api/v1/       # Versioned API routes (auth, accounts, copilot, etc.)
+│   │   ├── models/       # SQLAlchemy database models
+│   │   ├── schemas/      # Pydantic data validation schemas
+│   │   ├── services/     # Financial health, forecasting, categorization logic
+│   │   └── providers/    # Account Aggregator & LLM provider interfaces
+│   ├── tests/            # Pytest test suite
+│   ├── requirements.txt  # Python package dependencies
+│   └── pyproject.toml    # Python project configuration
+│
+├── docs/                 # Architecture, API specification, and design blueprints
+└── package.json          # Root orchestration scripts
 ```
 
 The main navigation areas are organized under `app/(tabs)`. Detail and focused workflows live in route groups such as `app/copilot`, `app/debt`, `app/simulator`, `app/split`, and `app/transaction`.
