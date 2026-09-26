@@ -75,3 +75,7 @@ Mock UI/
 # Local agent files
 .agents/
 /docs
+
+# Supabase temporary files
+supabase/.temp/
+.temp/
